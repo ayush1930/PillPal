@@ -1,4 +1,3 @@
-"""Record in-person cash collection. No online payment gateway is used."""
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 
