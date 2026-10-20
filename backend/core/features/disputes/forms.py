@@ -3,7 +3,7 @@ from core.features.orders.models import Order
 from .models import Dispute
 from .services import validate_evidence
 
-class DisputeForm(forms.Form):
+class DisputeForm(forms.Form): # allow patient to submit commplaint
     order = forms.ModelChoiceField(queryset=Order.objects.none())
     subject = forms.CharField(max_length=180)
     category = forms.ChoiceField(choices=Dispute.Category.choices)
