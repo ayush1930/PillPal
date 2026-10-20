@@ -1,8 +1,3 @@
-"""Business operations shared by Django views and future mobile adapters.
-
-Accept domain objects and values, never HTTP requests, serializers or responses.
-All prices and ownership rules are validated on the server.
-"""
 from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied, ValidationError
