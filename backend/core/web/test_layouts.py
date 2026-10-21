@@ -368,4 +368,3 @@ class RebuiltLayoutTests(TestCase):
             self.client.get('/app/overview/'),
             'Orders Available for Delivery'
         )
-
