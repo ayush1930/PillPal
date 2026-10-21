@@ -49,7 +49,6 @@ class RegistrationForm(forms.Form):
         from core.features.accounts.services import register_patient
         return register_patient(**self.cleaned_data)
 
-
 class ContactForm(forms.Form):
     name = forms.CharField(max_length=150)
     email = forms.EmailField()
@@ -71,3 +70,32 @@ class MedicationTimesField(forms.CharField):
         except (ValueError,TypeError):
             raise forms.ValidationError('Use times such as 08:00, 20:00.')
         return times
+
+class PrescriptionReviewForm(forms.Form):
+    status=forms.ChoiceField(choices=[('approved','Approve'),('rejected','Reject')],label='Decision')
+    kind=forms.ChoiceField(choices=Prescription.Kind.choices,label='Prescription type')
+    refills_remaining=forms.IntegerField(min_value=0,initial=0)
+    review_notes=forms.CharField(required=False,widget=forms.Textarea)
+
+
+class InvitationForm(forms.Form):
+    first_name = forms.CharField(max_length=150)
+    last_name = forms.CharField(max_length=150)
+    email = forms.EmailField()
+    role = forms.ChoiceField(choices=[(r, r.title()) for r in ['pharmacist','driver','admin']])
+    pharmacy = forms.ModelChoiceField(queryset=Pharmacy.objects.filter(active=True), required=False, help_text='Assign a pharmacy when inviting a pharmacist.')
+
+    clean_email = RegistrationForm.clean_email
+
+    def clean(self):
+        data = super().clean()
+        if data.get('role') == 'pharmacist' and not data.get('pharmacy'):
+            self.add_error('pharmacy', 'Choose a pharmacy for this pharmacist.')
+        return data
+
+    @transaction.atomic
+    def save(self, *, invited_by):
+        from core.features.accounts.services import invite_staff
+        return invite_staff(actor=invited_by, **self.cleaned_data)
+
+
