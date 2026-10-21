@@ -9,6 +9,9 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from .presentation import opening_state
 
+from core.features.accounts.models import Address
+from core.features.notifications.models import Notification
+
 class RebuiltLayoutTests(TestCase):
     # Use the existing website test data
     setUp = base_tests.NativeWebsiteTests.setUp
@@ -124,3 +127,74 @@ class RebuiltLayoutTests(TestCase):
                 datetime(2026, 10, 15, 12, 0, tzinfo=ZoneInfo('UTC'))
             )
         )
+    
+    def test_standard_form_validation_and_redirect(self):
+        # Check address form validation
+        self.client.force_login(self.patient)
+        url = reverse('resource_create', args=['addresses'])
+
+        response = self.client.get(url)
+        self.assertContains(response, '<form')
+        self.assertContains(response, '<html')
+
+        # Missing fields should show an error
+        response = self.client.post(url, {'label': 'Home'})
+        self.assertContains(response, 'This field is required.')
+
+        # A valid address should be saved
+        response = self.client.post(url, {
+            'label': 'Office',
+            'street': '2 Main',
+            'city': 'Test',
+            'state': 'Test',
+            'postal_code': '123'
+        })
+
+        self.assertRedirects(response, '/app/addresses/')
+        self.assertTrue(
+            Address.objects.filter(user=self.patient, label='Office').exists()
+        )
+
+    def test_prescription_file_access_is_scoped(self):
+        # Patient can access their prescription file
+        self.client.force_login(self.patient)
+
+        response = self.client.get(
+            reverse('prescription_file', args=[self.rx.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        response.close()
+
+        # Another user cannot access the file
+        self.client.force_login(self.users['driver'])
+
+        response = self.client.get(
+            reverse('prescription_file', args=[self.rx.pk])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_notification_read_all_only_updates_current_user(self):
+        # Create notifications for two different users
+        own = Notification.objects.create(
+            user=self.patient,
+            kind='order',
+            title='Own',
+            body='Own'
+        )
+
+        other = Notification.objects.create(
+            user=self.users['driver'],
+            kind='order',
+            title='Other',
+            body='Other'
+        )
+
+        self.client.force_login(self.patient)
+        self.client.post(reverse('notifications_read_all'))
+
+        own.refresh_from_db()
+        other.refresh_from_db()
+
+        # Only the patient's notification should be marked as read
+        self.assertIsNotNone(own.read_at)
+        self.assertIsNone(other.read_at)
