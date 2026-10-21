@@ -41,3 +41,28 @@ class SemesterOneScopeTests(TestCase):
                     resource_form(resource, self.users['admin']).fields
                 )
             )
+
+    
+    def test_web_pages_present_complete_current_workflows_without_future_controls(self):
+        # Pages that should be accessible to each user role
+        for role, urls in [
+            ('patient', ['/app/pharmacies/', '/app/tracking/']),
+            ('pharmacist', ['/app/inventory/', '/inventory/add/']),
+            ('driver', ['/app/overview/'])
+        ]:
+            self.client.force_login(self.users[role])
+
+            # Check that each page loads successfully
+            for url in urls:
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+
+                # Future features should not appear on these pages
+                for text in [
+                    'Scan Barcode',
+                    'Use Camera',
+                    'Live Tracking',
+                    'Coming soon'
+                ]:
+                    self.assertNotContains(response, text)
+
