@@ -98,7 +98,7 @@ class InvitationForm(forms.Form):
         from core.features.accounts.services import invite_staff
         return invite_staff(actor=invited_by, **self.cleaned_data)
 
-    FORMS = {
+FORMS = {
     'addresses': (Address, ['label','street','city','state','postal_code','latitude','longitude','is_default']),
     'pharmacies': (Pharmacy, ['name','address','phone','email','latitude','longitude','opening_hours','delivery_available','delivery_radius_miles','active']),
     'medications': (Medication, ['name','generic_name','brand','category','dosage_form','description','requires_prescription','active']),
@@ -110,5 +110,48 @@ class InvitationForm(forms.Form):
     'reorders': (ReorderRequest, ['inventory_item','quantity','priority','notes']),
     'profile': (User, ['first_name','last_name','phone','avatar']),
 }
+
+class DomainModelForm(forms.ModelForm):
+    def clean(self):
+        data = super().clean()
+        for start, end in [('issue_date', 'expiry_date'), ('start_date', 'end_date')]:
+            if data.get(start) and data.get(end) and data[end] < data[start]:
+                self.add_error(end, 'The end date cannot be earlier than the start date.')
+        if 'quantity' in data and data['quantity'] < 1:
+            self.add_error('quantity', 'Enter a positive quantity.')
+        if 'price' in data and data['price'] < 0:
+            self.add_error('price', 'Price cannot be negative.')
+        if 'latitude' in data and 'longitude' in data:
+            if (data['latitude'] is None) != (data['longitude'] is None):
+                self.add_error('latitude', 'Enter both latitude and longitude, or leave both blank.')
+        return data
+
+    def clean_file(self):
+        upload = self.cleaned_data.get('file')
+        if upload:
+            FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png', 'webp'])(upload)
+            if upload.size > 10 * 1024 * 1024:
+                raise forms.ValidationError('Upload a file no larger than 10 MB.')
+        return upload
+
+
+def resource_form(resource, user, data=None, files=None, instance=None):
+    model, fields = FORMS[resource]
+    widgets = {name: forms.DateInput(attrs={'type':'date'}) for name in fields if name.endswith('_date')}
+    form = modelform_factory(model, form=DomainModelForm, fields=fields, widgets=widgets)(data=data, files=files, instance=instance)
+    for name in ['latitude', 'longitude']:
+        if name in form.fields:
+            form.fields[name].help_text = 'Optional saved coordinate for straight-line pharmacy distance estimates.'
+    if resource == 'inventory' and user.role == 'pharmacist':
+        form.fields['pharmacy'].queryset = Pharmacy.objects.filter(staff__user=user)
+    if resource == 'reviews':
+        from core.features.orders.models import Order
+        from django.db.models import Q
+        form.fields['order'].queryset = Order.objects.filter(patient=user, status='delivered').filter(Q(review__isnull=True) | Q(pk=instance.order_id if instance else None))
+    if resource == 'reorders' and user.role == 'pharmacist':
+        form.fields['inventory_item'].queryset = InventoryItem.objects.filter(pharmacy__staff__user=user)
+    if resource == 'reminders':
+        form.fields['times']=MedicationTimesField(label='Medication times',widget=forms.TextInput(attrs={'placeholder':'08:00, 20:00'}),help_text='Enter one or more times separated by commas.')
+    return form
 
 
