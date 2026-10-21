@@ -289,3 +289,83 @@ class RebuiltLayoutTests(TestCase):
         )
         self.assertIn('08:00, 20:00', str(form['times']))
 
+    
+    def test_prescription_review_dialog_validates_and_saves(self):
+        # Check prescription review permissions and validation
+        self.rx.status = 'pending'
+        self.rx.save()
+
+        url = reverse('review_prescription', args=[self.rx.pk])
+
+        # Patients should not be allowed to review prescriptions
+        self.client.force_login(self.patient)
+        self.assertEqual(self.client.get(url).status_code, 403)
+
+        # Pharmacists should be able to access the review form
+        self.client.force_login(self.users['pharmacist'])
+        self.assertContains(self.client.get(url), 'Review Prescription')
+
+        # Negative refill values should be rejected
+        response = self.client.post(url, {
+            'status': 'approved',
+            'kind': 'repeat',
+            'refills_remaining': -1
+        })
+
+        self.assertContains(
+            response,
+            'Ensure this value is greater than or equal to 0.'
+        )
+
+        # Valid review information should be saved
+        response = self.client.post(url, {
+            'status': 'approved',
+            'kind': 'repeat',
+            'refills_remaining': 3,
+            'review_notes': 'Reviewed'
+        })
+
+        self.assertRedirects(response, '/app/prescriptions/')
+
+        self.rx.refresh_from_db()
+        self.assertEqual(self.rx.refills_remaining, 3)
+
+    def test_driver_session_availability_can_be_toggled(self):
+        # Only drivers can change their availability
+        self.client.force_login(self.patient)
+        self.assertEqual(
+            self.client.post('/driver/availability/').status_code,
+            403
+        )
+
+        self.client.force_login(self.users['driver'])
+
+        # Driver should initially be online
+        self.assertContains(
+            self.client.get('/app/overview/'),
+            'You are online.'
+        )
+
+        # GET requests should not change availability
+        self.assertEqual(
+            self.client.get('/driver/availability/').status_code,
+            405
+        )
+
+        # Switch driver to offline
+        self.client.post('/driver/availability/')
+        self.assertFalse(self.client.session['driver_online'])
+
+        response = self.client.get('/app/overview/')
+        self.assertContains(response, 'You are offline.')
+        self.assertNotContains(response, 'Orders Available for Delivery')
+
+        # Switch driver back to online
+        self.client.post('/driver/availability/')
+        self.assertTrue(self.client.session['driver_online'])
+
+        self.assertContains(
+            self.client.get('/app/overview/'),
+            'Orders Available for Delivery'
+        )
+
