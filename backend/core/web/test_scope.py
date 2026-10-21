@@ -66,3 +66,26 @@ class SemesterOneScopeTests(TestCase):
                 ]:
                     self.assertNotContains(response, text)
 
+        
+    def test_no_device_or_api_client_code_is_shipped(self):
+        # Locate the frontend static files
+        static = settings.BASE_DIR.parent / 'frontend/static'
+
+        # Barcode scanning JavaScript should not exist
+        self.assertFalse((static / 'js/barcode.js').exists())
+
+        # Check all JavaScript files
+        for script in (static / 'js').glob('*.js'):
+            source = script.read_text(encoding='utf-8')
+
+            # Future device and API features should not be included
+            for feature in [
+                'BarcodeDetector',
+                'getUserMedia',
+                'geolocation',
+                'Accelerometer',
+                'fetch(',
+                'XMLHttpRequest'
+            ]:
+                self.assertNotIn(feature, source)
+
