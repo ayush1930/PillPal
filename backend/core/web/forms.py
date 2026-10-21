@@ -98,4 +98,17 @@ class InvitationForm(forms.Form):
         from core.features.accounts.services import invite_staff
         return invite_staff(actor=invited_by, **self.cleaned_data)
 
+    FORMS = {
+    'addresses': (Address, ['label','street','city','state','postal_code','latitude','longitude','is_default']),
+    'pharmacies': (Pharmacy, ['name','address','phone','email','latitude','longitude','opening_hours','delivery_available','delivery_radius_miles','active']),
+    'medications': (Medication, ['name','generic_name','brand','category','dosage_form','description','requires_prescription','active']),
+    'inventory': (InventoryItem, ['pharmacy','medication','supplier','price','stock','reorder_level','active']),
+    'prescriptions': (Prescription, ['medication_name','doctor_name','issue_date','expiry_date','file']),
+    'reminders': (Reminder, ['medication_name','dosage','frequency','times','start_date','end_date','active']),
+    'reviews': (Review, ['order','rating','comment']),
+    'suppliers': (Supplier, ['name','email','phone','lead_time_days','payment_terms','active']),
+    'reorders': (ReorderRequest, ['inventory_item','quantity','priority','notes']),
+    'profile': (User, ['first_name','last_name','phone','avatar']),
+}
+
 
