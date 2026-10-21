@@ -12,6 +12,8 @@ from .presentation import opening_state
 from core.features.accounts.models import Address
 from core.features.notifications.models import Notification
 
+from core.features.reminders.models import Reminder
+
 class RebuiltLayoutTests(TestCase):
     # Use the existing website test data
     setUp = base_tests.NativeWebsiteTests.setUp
@@ -198,3 +200,92 @@ class RebuiltLayoutTests(TestCase):
         # Only the patient's notification should be marked as read
         self.assertIsNotNone(own.read_at)
         self.assertIsNone(other.read_at)
+
+    
+    def test_reminder_toggle_and_ownership(self):
+        # Create a reminder for the patient
+        reminder = Reminder.objects.create(
+            patient=self.patient,
+            medication_name='Test',
+            dosage='1 tablet',
+            frequency='Daily',
+            times=['08:00'],
+            start_date='2026-10-15'
+        )
+
+        self.client.force_login(self.patient)
+
+        url = reverse(
+            'resource_action',
+            args=['reminders', reminder.pk, 'toggle']
+        )
+
+        # Patient can disable their reminder
+        self.client.post(url)
+        reminder.refresh_from_db()
+        self.assertFalse(reminder.active)
+
+        # Another user cannot change the reminder
+        self.client.force_login(self.users['driver'])
+        self.assertEqual(self.client.post(url).status_code, 404)
+
+    def test_catalogue_profile_and_filters_render(self):
+        # Check pharmacy catalogue and profile pages
+        self.client.force_login(self.patient)
+
+        self.assertContains(
+            self.client.get(reverse('catalogue', args=[self.pharmacy.pk])),
+            'medication-card'
+        )
+
+        self.assertContains(
+            self.client.get(
+                reverse('catalogue', args=[self.pharmacy.pk]),
+                {'view': 'profile'}
+            ),
+            'Pharmacy Information'
+        )
+
+        # A missing category should show no medication cards
+        self.assertNotContains(
+            self.client.get(
+                reverse('catalogue', args=[self.pharmacy.pk]),
+                {'category': 'Missing'}
+            ),
+            'class="card medication-card'
+        )
+
+    def test_reminder_time_input_accepts_human_readable_times(self):
+        from .forms import resource_form
+
+        # Check that comma-separated times are accepted
+        self.client.force_login(self.patient)
+
+        response = self.client.post(
+            reverse('resource_create', args=['reminders']),
+            {
+                'medication_name': 'Morning medicine',
+                'dosage': '1 tablet',
+                'frequency': 'Daily',
+                'times': '08:00, 20:00',
+                'start_date': '2026-10-15',
+                'active': 'on'
+            }
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        # Times should be saved as a list
+        reminder = Reminder.objects.get(
+            medication_name='Morning medicine'
+        )
+        self.assertEqual(reminder.times, ['08:00', '20:00'])
+
+        # Check that the form displays the saved times
+        form = resource_form(
+            'reminders',
+            self.patient,
+            instance=reminder
+        )
+        self.assertIn('08:00, 20:00', str(form['times']))
+
