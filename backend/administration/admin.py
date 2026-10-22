@@ -11,6 +11,7 @@ from core.features.orders.models import Order, OrderItem
 from core.features.suppliers.models import Supplier
 from core.features.reminders.models import Reminder
 from core.features.reviews.models import Review
+from core.features.notifications.models import Notification
 
 # Register addresses in the Django admin panel
 admin.site.register(Address)
@@ -62,3 +63,6 @@ admin.site.register(Reminder)
 
 # Register customer reviews
 admin.site.register(Review)
+
+# Register notifications
+admin.site.register(Notification)
