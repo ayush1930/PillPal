@@ -1,4 +1,3 @@
-"""Optional local demonstration records; never required by the application."""
 from getpass import getpass
 
 from django.contrib.auth.password_validation import validate_password
