@@ -8,6 +8,10 @@ from core.features.inventory.models import InventoryItem, ReorderRequest
 from core.features.prescriptions.models import Prescription
 from core.features.orders.models import Order, OrderItem
 
+from core.features.suppliers.models import Supplier
+from core.features.reminders.models import Reminder
+from core.features.reviews.models import Review
+
 # Register addresses in the Django admin panel
 admin.site.register(Address)
 
@@ -49,3 +53,12 @@ admin.site.register(Prescription)
 # Register orders and their items
 admin.site.register(Order)
 admin.site.register(OrderItem)
+
+# Register suppliers
+admin.site.register(Supplier)
+
+# Register medication reminders
+admin.site.register(Reminder)
+
+# Register customer reviews
+admin.site.register(Review)
