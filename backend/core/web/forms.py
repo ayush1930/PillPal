@@ -154,4 +154,3 @@ def resource_form(resource, user, data=None, files=None, instance=None):
         form.fields['times']=MedicationTimesField(label='Medication times',widget=forms.TextInput(attrs={'placeholder':'08:00, 20:00'}),help_text='Enter one or more times separated by commas.')
     return form
 
-
