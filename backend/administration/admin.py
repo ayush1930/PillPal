@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from core.features.accounts.models import User, Address
+from core.features.pharmacies.models import Pharmacy, PharmacyStaff
+from core.features.medications.models import Medication
+from core.features.inventory.models import InventoryItem, ReorderRequest
 
 # Register addresses in the Django admin panel
 admin.site.register(Address)
@@ -26,3 +29,14 @@ class PillPalUserAdmin(UserAdmin):
             "classes": ("wide",),
             "fields": ("email", "password1", "password2", "role")
         }))
+
+# Register pharmacies and their staff
+admin.site.register(Pharmacy)
+admin.site.register(PharmacyStaff)
+
+# Register medications
+admin.site.register(Medication)
+
+# Register inventory items and restock requests
+admin.site.register(InventoryItem)
+admin.site.register(ReorderRequest)
