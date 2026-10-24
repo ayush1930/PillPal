@@ -1,0 +1,43 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Notifications</h1>
+      <p class="muted">Stay up to date with your orders and account.</p>
+    </div>
+    <form method="post" action="{% url 'notifications_read_all' %}">
+      {% csrf_token %}
+      <button class="button outline compact">{% icon 'Check' size=16 %} Mark All Read</button>
+    </form>
+  </div>
+  <div class="section-tabs">
+    <a href="{% url 'dashboard_section' 'notifications' %}"
+      class="{% if not request.GET.unread %}active{% endif %}">All Notifications</a>
+    <a href="?unread=1" class="{% if request.GET.unread %}active{% endif %}">Unread {% if unread_count %}({{ unread_count }}){% endif %}</a>
+  </div>
+  <section class="card notification-list">
+    {% for notification in notifications %}
+      <article class="notification-item {% if not notification.read_at %}unread{% endif %}">
+        <span class="tile-icon small-tile">{% icon 'Bell' size=18 %}</span>
+        <div class="grow">
+          <h3>{{ notification.title }}</h3>
+          <p class="muted small">{{ notification.body }}</p>
+          <span class="muted tiny">{{ notification.created_at|timesince }} ago</span>
+          {% if notification.kind == "dispute" and notification.link|slice:":1" == "/" and notification.link|slice:":2" != "//" %}
+            <p><a href="{{ notification.link }}">View Dispute</a></p>
+          {% endif %}
+        </div>
+        {% if not notification.read_at %}
+          <form method="post"
+            action="{% url 'resource_action' 'notifications' notification.pk 'read' %}">
+            {% csrf_token %}
+            <button class="icon-link" aria-label="Mark read">{% icon 'Check' size=16 %}</button>
+          </form>
+        {% endif %}
+      </article>
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Bell" empty_title="You're all caught up" empty_text="New notifications will appear here." %}
+    {% endfor %}
+  </section>
+{% endblock %}
