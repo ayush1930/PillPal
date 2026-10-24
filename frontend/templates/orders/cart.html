@@ -1,0 +1,71 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+
+{% block dashboard_content %}
+
+<!-- Cart page heading -->
+<div class="page-heading">
+  <div>
+    <h1>Your Cart</h1>
+    <p class="muted">Review your medications and complete your order.</p>
+  </div>
+
+  <a class="button outline"
+     href="{% url 'dashboard_section' 'pharmacies' %}">
+    Continue Shopping
+  </a>
+</div>
+
+<!-- Display checkout errors -->
+{% if error %}
+  <p class="message error">{{ error }}</p>
+{% endif %}
+
+<div class="checkout-layout">
+
+  <!-- Medications added to the cart -->
+  <section class="card cart-items">
+    <h2>{% icon 'ShoppingCart' size=18 %} Medications</h2>
+
+    {% for row in cart_rows %}
+      <article class="checkout-item">
+        <span class="tile-icon">
+          {% icon 'Pill' size=20 %}
+        </span>
+
+        <div class="grow">
+          <h3>{{ row.item.medication.name }}</h3>
+          <p class="muted small">
+            {{ row.item.pharmacy.name }} · ${{ row.item.price }} each
+          </p>
+
+          <!-- Update or remove medication quantity -->
+          <form method="post"
+                action="{% url 'cart_update' row.item.pk %}"
+                class="quantity-form">
+            {% csrf_token %}
+
+            <input type="number"
+                   name="quantity"
+                   value="{{ row.quantity }}"
+                   min="0"
+                   max="{{ row.item.stock }}"
+                   aria-label="Quantity">
+
+            <button class="button outline compact">Update</button>
+            <span class="muted tiny">Set 0 to remove</span>
+          </form>
+        </div>
+
+        <strong class="price">${{ row.total }}</strong>
+      </article>
+
+    {% empty %}
+      <!-- Message when the cart has no items -->
+      {% include "partials/empty.html" with empty_icon="ShoppingCart" empty_title="Your cart is empty" empty_text="Find a pharmacy and add your medications to get started." %}
+    {% endfor %}
+  </section>
+
+</div>
+
+{% endblock %}
