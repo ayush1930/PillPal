@@ -1,0 +1,39 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>{% if user.role == "admin" %}Disputes{% else %}My Disputes{% endif %}</h1>
+      <p class="muted">{% if user.role == "admin" %}Review order complaints and respond to patients.{% else %}Report order problems and follow their resolution.{% endif %}</p>
+    </div>
+    {% if user.role == "patient" %}
+      <a class="button"
+        href="{% url 'dispute_create' %}">{% icon 'Plus' size=16 %} Report a Problem</a>
+    {% endif %}
+  </div>
+  {% include "partials/filter_tabs.html" %}
+  <section class="card">
+    <form method="get" class="table-toolbar">
+      <input type="hidden" name="status" value="{{ status_filter }}">
+      <label class="search-input">{% icon 'Search' size=16 %}<input type="search"
+        name="q"
+        value="{{ search }}"
+        placeholder="Search subject, pharmacy or order number"
+        aria-label="Search disputes"></label>
+      <button class="button outline compact">Search</button>
+    </form>
+    {% for dispute in disputes %}
+      <article class="dispute-row">
+        <div class="grow">
+          <div class="card-title-line">
+            <h3>{% if user.role == "admin" %}<a href="{% url 'admin_dispute_detail' dispute.pk %}">{% else %}<a href="{% url 'dispute_detail' dispute.pk %}">{% endif %}#{{ dispute.pk }} · {{ dispute.subject }}</a></h3><span class="badge dispute-{{ dispute.status }}">{{ dispute.get_status_display }}</span></div><p class="muted small">Order #{{ dispute.order_id }} · {{ dispute.order.pharmacy.name }} · {{ dispute.get_category_display }}</p>{% if user.role == "admin" %}<p class="muted small">Patient: {{ dispute.order.patient.name }}</p>{% endif %}<span class="muted tiny">Submitted {{ dispute.created_at|date:'M j, Y, g:i A' }}</span></div>
+        {% if user.role == "admin" %}<a class="button outline compact"
+          href="{% url 'admin_dispute_detail' dispute.pk %}">Review</a>{% else %}<a class="button outline compact"
+     href="{% url 'dispute_detail' dispute.pk %}">View</a>{% endif %}
+        </article>
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="AlertCircle" empty_title="No disputes found" empty_text="No complaints match this view." %}
+    {% endfor %}
+    {% if disputes.has_other_pages %}<nav class="actions" aria-label="Dispute pages">{% if disputes.has_previous %}<a href="{% query_url page=disputes.previous_page_number %}">Previous</a>{% endif %}<span>Page {{ disputes.number }} of {{ disputes.paginator.num_pages }}</span>{% if disputes.has_next %}<a href="{% query_url page=disputes.next_page_number %}">Next</a>{% endif %}</nav>{% endif %}
+  </section>
+{% endblock %}
