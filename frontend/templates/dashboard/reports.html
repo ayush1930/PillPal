@@ -1,0 +1,69 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>{{ page_title }}</h1>
+      <p class="muted">{% if is_earnings %}Review completed deliveries and their recorded charges.{% else %}Platform performance, activity, and order trends.{% endif %}</p>
+    </div>
+  </div>
+  {% if is_earnings %}
+    <div class="earnings-banner">
+      <span class="muted-white small">COMPLETED DELIVERIES</span>
+      <strong>{{ recent_orders|length }}</strong>
+      <p>Delivery charges for your completed orders.</p>
+    </div>
+  {% endif %}
+  <div class="grid three compact-stats">
+    {% for label,value in stats %}
+      <article class="card">
+        <span class="muted small">{{ label }}</span>
+        <strong>{{ value|floatformat:'-2' }}</strong>
+      </article>
+    {% endfor %}
+  </div>
+  <div class="grid two">
+    <section class="card">
+      <h2>Orders per Month</h2>
+      {% include "dashboard/chart.html" %}
+    </section>
+    <section class="card">
+      <h2>Order Value Trend</h2>
+      <div class="bar-chart">
+        {% for month in chart_months %}
+          <div class="bar-column">
+            <span class="bar-value">${{ month.total|floatformat:0 }}</span>
+            <div class="bar-track">
+              <span style="height:{{ month.revenue_height }}%"></span>
+            </div>
+            <span class="bar-label">{{ month.month|date:'M' }}</span>
+          </div>
+        {% empty %}
+          <p class="empty">No order data yet.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+  {% if user_breakdown %}
+    <section class="card">
+      <h2>User Breakdown</h2>
+      <div class="grid four">
+        {% for item in user_breakdown %}
+          <div class="breakdown-tile">
+            <strong>{{ item.total }}</strong>
+            <span class="muted">{{ item.role|title }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+  <section class="card">
+    <div class="section-title">
+      <h2>Completed Orders</h2>
+      {% if user.role == "admin" %}
+        <a class="button outline compact" href="{% url 'export_orders' %}">{% icon 'FileText' size=16 %} Export Orders CSV</a>
+      {% endif %}
+    </div>
+    {% include "orders/table.html" with orders=recent_orders %}
+  </section>
+{% endblock %}
