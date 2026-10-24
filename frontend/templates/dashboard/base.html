@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load pillpal_icons %}
+{% block content %}
+  <div class="dashboard">
+    <button class="sidebar-backdrop"
+      data-sidebar-toggle
+      aria-label="Close navigation">
+    </button>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        {% include "partials/logo.html" %}
+        <button class="mobile-only circle-button"
+          data-sidebar-toggle
+          aria-label="Close navigation">{% icon 'X' size=18 %}</button>
+      </div>
+      <a class="user-panel" href="{% url 'dashboard_section' 'profile' %}"><span class="avatar">{{ display_initials }}</span><div><strong>{{ user.name }}</strong><span class="badge role-{{ user.role }}">{{ user.get_role_display }}</span></div></a>
+      <nav aria-label="Dashboard">
+        {% for item in nav %}
+          <a class="nav-item {% if section == item.key %}active{% endif %}"
+            href="{% url 'dashboard_section' item.key %}"
+            {% if section == item.key %}aria-current="page"{% endif %}><span class="nav-dot">{% nav_icon item.key user.role %}</span>{{ item.label }}</a>
+        {% endfor %}
+      </nav>
+      <form method="post"
+        action="{% url 'sign_out' %}"
+        class="sign-out">
+        {% csrf_token %}
+        <button>{% icon 'LogOut' size=16 %} Sign Out</button>
+      </form>
+    </aside>
+    <div class="workspace">
+      <header class="dashboard-header">
+        <div class="header-left">
+          <button class="mobile-only circle-button"
+            data-sidebar-toggle
+            aria-label="Open navigation">{% icon 'Menu' size=20 %}</button>
+          <span class="breadcrumb">{% nav_icon section user.role %} {{ page_title }}</span>
+        </div>
+        <div class="header-actions">
+          {% if user.role == "patient" %}
+            <a class="circle-button"
+              href="{% url 'cart' %}"
+              aria-label="Shopping cart"
+              title="Shopping cart">{% icon 'ShoppingCart' size=18 %}{% if cart_count %}<span class="count">{{ cart_count }}</span>{% endif %}</a>
+          {% endif %}
+          <a class="circle-button"
+            href="{% url 'dashboard_section' 'notifications' %}"
+            aria-label="Notifications"
+            title="Notifications">{% icon 'Bell' size=18 %}
+          {% if unread_count %}
+            <span class="notification-dot"></span>
+          {% endif %}
+        </a>
+          <a class="avatar header-avatar"
+            href="{% url 'dashboard_section' 'profile' %}"
+            aria-label="Your profile">{{ display_initials }}</a>
+        </div>
+      </header>
+      <main class="dashboard-content">
+        {% block dashboard_content %}
+        {% endblock %}
+      </main>
+    </div>
+  </div>
+{% endblock %}
