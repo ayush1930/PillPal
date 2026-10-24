@@ -1,0 +1,140 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>{{ overview_title }}</h1>
+      <p class="muted">{{ subtitle }}</p>
+    </div>
+    {% if user.role == "patient" %}
+      <a class="button" href="{% url 'resource_create' 'prescriptions' %}">{% icon 'Plus' size=16 %} Upload New</a>
+    {% endif %}
+    {% if user.role == "driver" %}
+      <form method="post" action="{% url 'driver_availability' %}">
+        {% csrf_token %}
+        <button class="availability-button {% if driver_online %}online{% endif %}"><span></span>{% if driver_online %}Online{% else %}Offline{% endif %}</button>
+      </form>
+    {% endif %}
+  </div>
+  {% if user.role == "driver" %}
+    <div class="availability-note {% if not driver_online %}offline{% endif %}">
+      <span></span>
+      {% if driver_online %}
+        You are online. Available orders are shown below.
+      {% else %}
+        You are offline. Go online to browse available deliveries.
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if active_order %}
+    <section class="delivery-banner">
+      <div>
+        {% icon 'Truck' size=24 %}
+        <div>
+          <strong>Order #{{ active_order.pk }} is on its way!</strong>
+          <p>Driver: {{ active_order.driver.name|default:'Awaiting assignment' }}{% if active_order.estimated_delivery %} · Estimated arrival: {{ active_order.estimated_delivery|date:'g:i A' }}{% endif %}</p>
+        </div>
+      </div>
+      <a class="button white" href="{% url 'order_detail' active_order.pk %}">Order Status</a>
+    </section>
+  {% endif %}
+  <div class="grid four stat-grid">
+    {% for stat in summary_stats %}
+      <article class="card stat-card">
+        <span class="stat-icon">{% icon stat.icon size=20 %}</span>
+        <strong class="stat-value">{% if stat.money %}${% endif %}{{ stat.value|floatformat:'-1'|default:stat.value }}</strong>
+        <span>{{ stat.label }}</span>
+        <small class="muted">{{ stat.sub }}</small>
+      </article>
+    {% endfor %}
+  </div>
+  {% if user.role == "admin" %}
+    <div class="grid two">
+      <section class="card">
+        <h2>Monthly Orders</h2>
+        {% include "dashboard/chart.html" %}
+      </section>
+      <section class="card">
+        <h2>Order Status Distribution</h2>
+        {% for item in order_breakdown %}
+          <div class="distribution-row">
+            <span><i class="status-dot status-{{ item.key }}"></i>{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </div>
+          <div class="distribution-track">
+            <span class="status-{{ item.key }}" style="width:{{ item.percent }}%"></span>
+          </div>
+        {% endfor %}
+      </section>
+    </div>
+  {% endif %}
+  {% if user.role == "driver" and driver_online %}
+    <section class="dashboard-section">
+      <div class="section-title">
+        <h2>Orders Available for Delivery</h2>
+        <a href="{% url 'dashboard_section' 'deliveries' %}">View all</a>
+      </div>
+      {% for order in available_deliveries %}
+        {% include "orders/summary_card.html" %}
+      {% empty %}
+        {% include "partials/empty.html" with empty_icon="Truck" empty_title="No deliveries available" empty_text="Orders ready for dispatch will appear here." %}
+      {% endfor %}
+    </section>
+  {% endif %}
+  {% if user.role == "pharmacist" %}
+    <section class="card">
+      <div class="section-title">
+        <h2>Pending Prescriptions</h2>
+        <a href="{% url 'dashboard_section' 'prescriptions' %}">View all</a>
+      </div>
+      {% for prescription in pending_prescriptions %}
+        <div class="person-row">
+          <span class="tile-icon small-tile">{% icon 'FileText' size=18 %}</span>
+          <div class="grow">
+            <strong>{{ prescription.medication_name }}</strong>
+            <p class="muted small">{{ prescription.patient.name }} · {{ prescription.created_at|date:'M j' }}</p>
+          </div>
+          <a class="button outline compact"
+            href="{% url 'dashboard_section' 'prescriptions' %}">Review</a>
+        </div>
+      {% empty %}
+        <p class="empty">No prescriptions awaiting review.</p>
+      {% endfor %}
+    </section>
+  {% endif %}
+  <section class="dashboard-section">
+    <div class="section-title">
+      <h2>Recent Orders</h2>
+      <a href="{% url 'dashboard_section' 'orders' %}">View all</a>
+    </div>
+    {% for order in recent_orders %}
+      {% include "orders/summary_card.html" %}
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Package" empty_title="No orders yet" %}
+    {% endfor %}
+  </section>
+  {% if user.role == "patient" %}
+    <section class="dashboard-section">
+      <div class="section-title">
+        <h2>Today's Reminders</h2>
+        <a href="{% url 'dashboard_section' 'reminders' %}">Manage</a>
+      </div>
+      {% for reminder in today_reminders %}
+        <article class="card reminder-summary">
+          <span class="tile-icon small-tile">{% icon 'Bell' size=16 %}</span>
+          <div class="grow">
+            <strong>{{ reminder.medication_name }} {{ reminder.dosage }}</strong>
+            <p class="muted small">{{ reminder.frequency }}</p>
+          </div>
+          <div class="time-pills">
+            {% for time in reminder.times %}
+              <span>{{ time }}</span>
+            {% endfor %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="muted">No reminders scheduled for today.</p>
+      {% endfor %}
+    </section>
+  {% endif %}
+{% endblock %}
