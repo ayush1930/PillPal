@@ -1,0 +1,13 @@
+<div class="bar-chart" role="img" aria-label="Monthly orders">
+  {% for month in chart_months %}
+    <div class="bar-column">
+      <span class="bar-value">{{ month.count }}</span>
+      <div class="bar-track">
+        <span style="height:{{ month.height }}%"></span>
+      </div>
+      <span class="bar-label">{{ month.month|date:'M' }}</span>
+    </div>
+  {% empty %}
+    <p class="empty">Charts will appear when orders are recorded.</p>
+  {% endfor %}
+</div>
