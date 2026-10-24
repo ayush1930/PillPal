@@ -1,0 +1,76 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Delivery History</h1>
+      <p class="muted">A record of your completed and cancelled deliveries.</p>
+    </div>
+  </div>
+  {% include "partials/filter_tabs.html" %}
+  <section class="card management-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>
+              Order
+            </th>
+            <th>
+              Pharmacy
+            </th>
+            <th>
+              Delivery Address
+            </th>
+            <th>
+              Delivered
+            </th>
+            <th>
+              Status
+            </th>
+            <th>
+              Delivery Fee
+            </th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            {% with order=row.item %}
+              <tr>
+                <td>
+                  #{{ order.pk }}
+                </td>
+                <td>
+                  {{ order.pharmacy.name }}
+                </td>
+                <td>
+                  {{ order.delivery_address.street|default:'Pickup' }}
+                </td>
+                <td>
+                  {{ order.delivered_at|date:'M j, Y'|default:'—' }}
+                </td>
+                <td>
+                  <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+                </td>
+                <td class="mono">
+                  ${{ order.delivery_fee }}
+                </td>
+                <td>
+                  <a href="{% url 'order_detail' order.pk %}">View</a>
+                </td>
+              </tr>
+            {% endwith %}
+          {% empty %}
+            <tr>
+              <td colspan="7">
+                {% include "partials/empty.html" with empty_icon="History" empty_title="No delivery history yet" %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
