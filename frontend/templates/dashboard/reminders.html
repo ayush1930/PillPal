@@ -1,0 +1,52 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Medication Reminders</h1>
+      <p class="muted">Never miss a dose. Manage your medication schedule.</p>
+    </div>
+    <a class="button" href="{% url 'resource_create' 'reminders' %}">{% icon 'Plus' size=16 %} Add Reminder</a>
+  </div>
+  <div class="grid two reminder-grid">
+    {% for row in rows %}
+      {% with reminder=row.item %}
+        <article class="card reminder-card {% if not reminder.active %}muted-card{% endif %}">
+          <div class="card-title-line">
+            <span class="tile-icon">{% icon 'Bell' size=20 %}</span>
+            <form method="post"
+              action="{% url 'resource_action' 'reminders' reminder.pk 'toggle' %}">
+              {% csrf_token %}
+              <button class="toggle-button {% if reminder.active %}on{% endif %}"
+                aria-label="{% if reminder.active %}Disable{% else %}Enable{% endif %} reminder"
+                aria-pressed="{{ reminder.active|yesno:'true,false' }}"><span></span></button>
+            </form>
+          </div>
+          <h3>{{ reminder.medication_name }}</h3>
+          <p class="muted small">{{ reminder.dosage }} · {{ reminder.frequency }}</p>
+          <div class="time-pills">
+            {% for time in reminder.times %}
+              <span>{% icon 'Clock' size=12 %} {{ time }}</span>
+            {% endfor %}
+          </div>
+          <div class="card-footer">
+            <span class="muted small">From {{ reminder.start_date|date:'M j, Y' }}{% if reminder.end_date %} to {{ reminder.end_date|date:'M j, Y' }}{% endif %}</span>
+            <div class="card-actions">
+              <a class="icon-link"
+                href="{% url 'resource_edit' 'reminders' reminder.pk %}"
+                aria-label="Edit reminder">{% icon 'Edit' size=16 %}</a>
+              <form method="post"
+                action="{% url 'resource_action' 'reminders' reminder.pk 'delete' %}"
+                data-confirm="Delete this reminder?">
+                {% csrf_token %}
+                <button class="icon-link danger" aria-label="Delete reminder">{% icon 'Trash' size=16 %}</button>
+              </form>
+            </div>
+          </div>
+        </article>
+      {% endwith %}
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Bell" empty_title="No reminders yet" empty_text="Add your medication times to keep your schedule together." %}
+    {% endfor %}
+  </div>
+{% endblock %}
