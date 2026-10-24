@@ -1,0 +1,24 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Drivers</h1>
+      <p class="muted">Drivers handling your pharmacy's deliveries.</p>
+    </div>
+  </div>
+  <div class="grid three">
+    {% for driver in drivers %}
+      <article class="card driver-card">
+        <span class="avatar">{{ driver.first_name|first }}{{ driver.last_name|first }}</span>
+        <h3>{{ driver.name }}</h3>
+        <span class="badge badge-open">Active Account</span>
+        <p class="muted small">{% icon 'Phone' size=14 %} {{ driver.phone|default:'No phone number listed' }}</p>
+        <a class="button outline compact"
+          href="{% url 'dashboard_section' 'queue' %}">View Assignments</a>
+      </article>
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Truck" empty_title="No drivers assigned yet" empty_text="Drivers appear here when they handle your pharmacy deliveries." %}
+    {% endfor %}
+  </div>
+{% endblock %}
