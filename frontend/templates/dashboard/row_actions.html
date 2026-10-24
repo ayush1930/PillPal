@@ -1,0 +1,66 @@
+{% load pillpal_icons %}
+{% if row.editable %}
+  <a href="{% url 'resource_edit' resource item.pk %}">{% icon "Edit" size=14 %} Edit</a>
+{% endif %}
+{% if resource == "orders" %}
+  <a href="{% url 'order_detail' item.pk %}">View Status</a>
+{% endif %}
+{% if resource == "pharmacies" and user.role == "patient" %}
+  <a class="button small" href="{% url 'catalogue' item.pk %}">{% icon "Package" size=14 %} Browse Medications</a>
+{% endif %}
+{% if resource == "prescriptions" %}
+  {% if user.role == "patient" %}
+    <form method="post"
+      action="{% url 'resource_action' resource item.pk 'refill' %}">
+      {% csrf_token %}
+      <button class="link-button">{% icon "RefreshCw" size=14 %} Request Refill</button>
+    </form>
+  {% endif %}
+  {% if user.role == "pharmacist" or user.role == "admin" %}
+    <a class="button outline compact"
+      href="{% url 'review_prescription' item.pk %}">{% icon 'Eye' size=14 %} Review</a>
+  {% endif %}
+{% endif %}
+{% if resource == "users" and item.pk != user.pk %}
+  <form method="post"
+    action="{% url 'resource_action' resource item.pk 'role' %}"
+    class="actions">
+    {% csrf_token %}
+    <select name="role" aria-label="New role">
+    <option value="patient" {% if item.role == 'patient' %}selected{% endif %}>Patient</option>
+    <option value="pharmacist"
+      {% if item.role == 'pharmacist' %}selected{% endif %}>Pharmacist</option>
+    <option value="driver" {% if item.role == 'driver' %}selected{% endif %}>Driver</option>
+    <option value="admin" {% if item.role == 'admin' %}selected{% endif %}>Admin</option>
+    </select>
+    <button class="link-button">Set Role</button>
+  </form>
+  <form method="post"
+    action="{% url 'resource_action' resource item.pk 'active' %}">
+    {% csrf_token %}
+    <button class="link-button">{% if item.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+  </form>
+{% endif %}
+{% if resource == "reorders" %}
+  <form method="post"
+    action="{% url 'resource_action' resource item.pk 'status' %}"
+    class="actions">
+    {% csrf_token %}
+    <select name="status" aria-label="Reorder status">
+    <option value="pending">Pending</option>
+    <option value="approved">Approved</option>
+    <option value="sent">Sent</option>
+    <option value="received">Received</option>
+    <option value="cancelled">Cancelled</option>
+    </select>
+    <button class="link-button">Update</button>
+  </form>
+{% endif %}
+{% if row.editable and resource != "inventory" and resource != "pharmacies" and resource != "suppliers" and resource != "reorders" %}
+  <form method="post"
+    action="{% url 'resource_action' resource item.pk 'delete' %}"
+    data-confirm="Delete this record?">
+    {% csrf_token %}
+    <button class="link-button danger">{% icon "Trash" size=14 %} Delete</button>
+  </form>
+{% endif %}
