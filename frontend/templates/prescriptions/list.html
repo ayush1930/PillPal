@@ -1,0 +1,25 @@
+{% extends "dashboard/base.html" %} {% load pillpal_icons %} {% block dashboard_content %}
+Prescriptions
+Upload and manage your prescriptions.
+
+{% icon 'Plus' size=16 %} Upload New
+{% include "partials/filter_tabs.html" %}
+{% for row in rows %} {% with rx=row.item %}
+{% icon 'FileText' size=22 %} {{ rx.get_status_display }}
+{{ rx.medication_name }}
+{{ rx.doctor_name }}
+
+Issued {{ rx.issue_date|date:'M j, Y' }} Expires {{ rx.expiry_date|date:'M j, Y' }}
+{% if rx.kind %}
+{{ rx.get_kind_display }} {% if rx.kind == "repeat" %} {{ rx.refills_remaining }} refill{{ rx.refills_remaining|pluralize }} remaining {% endif %}
+{% endif %} {% if rx.review_notes %}
+{{ rx.review_notes }}
+
+{% endif %}
+{% icon 'Eye' size=14 %} View File {% if rx.status == "approved" and rx.kind == "repeat" %}
+{% csrf_token %} {% icon 'RefreshCw' size=14 %} Refill
+{% endif %} {% if row.editable %} {% icon 'Edit' size=16 %}
+{% csrf_token %} {% icon 'Trash' size=16 %}
+{% endif %}
+{% endwith %} {% empty %} {% include "partials/empty.html" with empty_icon="FileText" empty_title="No prescriptions yet" empty_text="Upload a photo or PDF to submit a prescription for review." %} {% endfor %}
+{% endblock %}
