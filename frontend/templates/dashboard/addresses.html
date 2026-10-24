@@ -1,0 +1,38 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Saved Addresses</h1>
+      <p class="muted">Manage your delivery locations.</p>
+    </div>
+    <a class="button" href="{% url 'resource_create' 'addresses' %}">{% icon 'Plus' size=16 %} Add Address</a>
+  </div>
+  <div class="grid two">
+    {% for row in rows %}
+      {% with address=row.item %}
+        <article class="card address-card">
+          <div class="card-title-line">
+            <h3>{% icon 'MapPin' size=18 %} {{ address.label }}</h3>
+            {% if address.is_default %}
+              <span class="badge">Default</span>
+            {% endif %}
+          </div>
+          <p>{{ address.street }}<br>{{ address.city }}, {{ address.state }} {{ address.postal_code }}</p>
+          <div class="card-footer">
+            <a class="button outline compact"
+              href="{% url 'resource_edit' 'addresses' address.pk %}">{% icon 'Edit' size=14 %} Edit</a>
+            <form method="post"
+              action="{% url 'resource_action' 'addresses' address.pk 'delete' %}"
+              data-confirm="Delete this address?">
+              {% csrf_token %}
+              <button class="icon-link danger" aria-label="Delete address">{% icon 'Trash' size=16 %}</button>
+            </form>
+          </div>
+        </article>
+      {% endwith %}
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="MapPin" empty_title="No saved addresses" empty_text="Add a delivery address before checkout." %}
+    {% endfor %}
+  </div>
+{% endblock %}
