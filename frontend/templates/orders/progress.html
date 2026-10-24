@@ -1,0 +1,19 @@
+{% load pillpal_icons %}
+<div class="order-progress">
+  <div class="progress-step done">
+    <span>{% icon 'Check' size=16 %}</span>
+    <strong>Order Placed</strong>
+  </div>
+  <div class="progress-step {% if order.status != 'pending' and order.status != 'cancelled' %}done{% endif %}">
+    <span>{% icon 'Package' size=16 %}</span>
+    <strong>Processing</strong>
+  </div>
+  <div class="progress-step {% if order.status == 'ready' or order.status == 'out_for_delivery' or order.status == 'delivered' %}done{% endif %}">
+    <span>{% icon 'Building' size=16 %}</span>
+    <strong>Ready</strong>
+  </div>
+  <div class="progress-step {% if order.status == 'out_for_delivery' or order.status == 'delivered' %}done{% endif %}">
+    <span>{% icon 'Truck' size=16 %}</span>
+    <strong>{% if order.status == "delivered" %}Delivered{% else %}Delivery{% endif %}</strong>
+  </div>
+</div>
