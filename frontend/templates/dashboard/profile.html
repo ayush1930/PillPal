@@ -1,0 +1,115 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>{{ page_title }}</h1>
+      <p class="muted">Manage your personal details and account preferences.</p>
+    </div>
+  </div>
+  <div class="card profile-banner">
+    <span class="avatar profile-avatar">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="Your profile picture">{% else %}{{ display_initials }}{% endif %}</span>
+    <div>
+      <h2>{{ user.name }}</h2>
+      <p class="muted">{{ user.email }}</p>
+      <span class="badge role-{{ user.role }}">{{ user.get_role_display }}</span>
+    </div>
+  </div>
+  <div class="section-tabs profile-tabs">
+    <button class="active" type="button" data-profile-tab="personal">Personal Information</button>
+    {% if user.role == "patient" %}
+      <button type="button" data-profile-tab="addresses">Saved Addresses</button>
+      <button type="button" data-profile-tab="payments">Payment Methods</button>
+    {% endif %}
+    {% if user.role == "pharmacist" %}
+      <button type="button" data-profile-tab="pharmacies">Pharmacy Profile</button>
+    {% endif %}
+    <button type="button" data-profile-tab="account">Account &amp; Security</button>
+  </div>
+  <section class="card profile-panel" data-profile-panel="personal">
+    <h2>{% icon 'User' size=18 %} Personal Information</h2>
+    <form method="post" enctype="multipart/form-data" class="form-stack">
+      {% csrf_token %}
+      {% include "dashboard/form_fields.html" %}
+      <div class="dialog-footer">
+        <button class="button">Save Changes</button>
+      </div>
+    </form>
+  </section>
+  {% if user.role == "patient" %}
+    <section class="profile-panel" data-profile-panel="addresses" hidden>
+      <div class="section-title">
+        <h2>Saved Addresses</h2>
+        <a class="button compact" href="{% url 'resource_create' 'addresses' %}">{% icon 'Plus' size=14 %} Add Address</a>
+      </div>
+      <div class="grid two">
+        {% for address in addresses %}
+          <article class="card">
+            <div class="card-title-line">
+              <h3>{% icon 'MapPin' size=16 %} {{ address.label }}</h3>
+              {% if address.is_default %}
+                <span class="badge">Default</span>
+              {% endif %}
+            </div>
+            <p class="muted">{{ address.street }}, {{ address.city }}, {{ address.postal_code }}</p>
+            <a href="{% url 'resource_edit' 'addresses' address.pk %}">Edit Address</a>
+          </article>
+        {% empty %}
+          {% include "partials/empty.html" with empty_icon="MapPin" empty_title="No addresses saved" %}
+        {% endfor %}
+      </div>
+    </section>
+    <section class="card profile-panel" data-profile-panel="payments" hidden>
+      <h2>Cash Payments</h2>
+      <p>Pay cash when your order is delivered or collected at the pharmacy. The responsible staff member records collection on the order page.</p>
+      <p class="muted">Cash collection is recorded against the order.</p>
+    </section>
+  {% endif %}
+  {% if user.role == "pharmacist" %}
+    <section class="profile-panel" data-profile-panel="pharmacies" hidden>
+      {% for pharmacy in pharmacies %}
+        <article class="card">
+          <div class="section-title">
+            <h2>{% icon 'Building' size=20 %} {{ pharmacy.name }}</h2>
+            <a class="button outline compact"
+              href="{% url 'resource_edit' 'pharmacies' pharmacy.pk %}">Edit Pharmacy Info</a>
+          </div>
+          <div class="info-row">
+            <span>Address</span>
+            <strong>{{ pharmacy.address }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Phone</span>
+            <strong>{{ pharmacy.phone }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Email</span>
+            <strong>{{ pharmacy.email }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Delivery available</span>
+            <strong>{{ pharmacy.delivery_available|yesno:'Yes,No' }}</strong>
+          </div>
+        </article>
+      {% empty %}
+        {% include "partials/empty.html" with empty_icon="Building" empty_title="No pharmacy assigned" %}
+      {% endfor %}
+    </section>
+  {% endif %}
+  <section class="card profile-panel" data-profile-panel="account" hidden>
+    <h2>{% icon 'Shield' size=18 %} Account &amp; Security</h2>
+    <div class="info-row">
+      <span>Email</span>
+      <strong>{{ user.email }}</strong>
+    </div>
+    <div class="info-row">
+      <span>Role</span>
+      <strong>{{ user.get_role_display }}</strong>
+    </div>
+    <div class="info-row">
+      <span>Joined</span>
+      <strong>{{ user.date_joined|date:'M j, Y' }}</strong>
+    </div>
+    <a class="button outline" href="{% url 'password_reset' %}">Change Password</a>
+  </section>
+{% endblock %}
