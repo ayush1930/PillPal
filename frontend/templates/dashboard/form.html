@@ -1,0 +1,30 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <a class="back-link" href="{% url 'dashboard' %}">{% icon 'ChevronLeft' size=16 %} Back to dashboard</a>
+  <div class="page-heading">
+    <div>
+      <h1>{{ form_title }}</h1>
+      <p class="muted">Enter the details below.</p>
+    </div>
+  </div>
+  <section class="card form-card">
+    <form method="post" enctype="multipart/form-data" class="form-stack">
+      {% csrf_token %}
+      {% if reviewed_prescription %}
+        <div class="card rx-review-summary">
+          <strong>{{ reviewed_prescription.medication_name }}</strong>
+          <p class="muted small">{{ reviewed_prescription.patient.name }} · {{ reviewed_prescription.doctor_name }}</p>
+          <a href="{% url 'prescription_file' reviewed_prescription.pk %}"
+            target="_blank"
+            rel="noopener">{% icon 'Eye' size=14 %} View Uploaded Prescription</a>
+        </div>
+      {% endif %}
+      {% include "dashboard/form_fields.html" %}
+      <div class="dialog-footer">
+        <a class="button outline" href="{% url 'dashboard' %}">Cancel</a>
+        <button class="button">{% icon 'Check' size=16 %} {{ submit_label|default:'Save' }}</button>
+      </div>
+    </form>
+  </section>
+{% endblock %}
