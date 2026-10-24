@@ -66,6 +66,92 @@
     {% endfor %}
   </section>
 
+
+  <!-- Checkout section, shown when the cart has items -->
+  {% if cart_rows %}
+    <aside class="card checkout-summary" data-cart-subtotal="{{ subtotal }}">
+      <h2>Checkout</h2>
+
+      <form method="post" class="form-stack">
+        {% csrf_token %}
+
+        <!-- Choose delivery or pickup -->
+        <label>
+          Delivery type
+          <select name="delivery_type" data-delivery-type>
+            <option value="delivery">Delivery</option>
+            <option value="pickup">Pickup</option>
+          </select>
+        </label>
+
+        <!-- Delivery address -->
+        <div data-address-field>
+          <label>
+            Delivery address
+            <select name="address">
+              <option value="">Choose address</option>
+              {% for address in addresses %}
+                <option value="{{ address.pk }}">
+                  {{ address.label }} — {{ address.street }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <a class="small" href="{% url 'resource_create' 'addresses' %}">
+            {% icon 'Plus' size=12 %} Add Address
+          </a>
+        </div>
+
+        <!-- Select an approved prescription -->
+        <label>
+          Approved prescription
+          <select name="prescription">
+            <option value="">No prescription needed</option>
+            {% for prescription in prescriptions %}
+              <option value="{{ prescription.pk }}"
+                {% if prescription.pk == selected_prescription %}selected{% endif %}>
+                {{ prescription.medication_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <a class="small" href="{% url 'resource_create' 'prescriptions' %}">
+          {% icon 'FileText' size=12 %} Upload Prescription
+        </a>
+
+        <!-- Order cost summary -->
+        <div class="info-row">
+          <span>Subtotal</span>
+          <strong>${{ subtotal }}</strong>
+        </div>
+
+        <div class="info-row">
+          <span>Delivery</span>
+          <strong data-delivery-charge>${{ display_fee }}</strong>
+        </div>
+
+        <div class="info-row total-row">
+          <span>Total</span>
+          <strong data-cart-total>${{ display_total }}</strong>
+        </div>
+
+        <p class="muted tiny">
+          Delivery is $4.99 below $30; otherwise free. Pickup is free.
+        </p>
+        <p class="muted small">
+          Payment: cash on delivery or collection.
+        </p>
+
+        <!-- Submit the order -->
+        <button class="button full">
+          Place Order {% icon 'ChevronRight' size=16 %}
+        </button>
+      </form>
+    </aside>
+  {% endif %}
+
 </div>
 
 {% endblock %}
