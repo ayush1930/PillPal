@@ -1,0 +1,17 @@
+{% load pillpal_icons %}
+<article class="card order-summary">
+  <div class="order-main">
+    <span class="tile-icon small-tile">{% icon 'Package' size=18 %}</span>
+    <div>
+      <strong>Order #{{ order.pk }}</strong>
+      <p class="muted small">{{ order.pharmacy.name }} · {{ order.created_at|date:'M j, Y' }}</p>
+      <p class="muted small">{% for item in order.items.all %}{{ item.inventory_item.medication.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    </div>
+  </div>
+  <div class="card-actions">
+    <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+    <strong class="mono">${{ order.total }}</strong>
+    <a class="button outline compact"
+      href="{% url 'order_detail' order.pk %}">View</a>
+  </div>
+</article>
