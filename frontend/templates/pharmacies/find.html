@@ -1,0 +1,25 @@
+{% extends "dashboard/base.html" %} {% load pillpal_icons %} {% block dashboard_content %}
+Find a Pharmacy
+Browse partner pharmacies or search for a specific medication.
+
+{% icon 'Search' size=16 %} Search Medications Across Pharmacies
+{% icon 'Search' size=16 %}
+{{ med_search }}
+Search medications
+{% include "pharmacies/med_results.html" %}
+{% icon 'Search' size=16 %}
+{{ search }}
+ 
+Rating (Highest)
+ Search
+Filter: Open Now Delivery Available Rating ≥ 4 {% icon 'Star' size=11 %} Rating ≥ 4.5 {% icon 'Star' size=11 %} {% if has_filters %} Clear filters {% endif %}
+{% for pharmacy in pharmacies %}
+{% icon 'Building' size=22 %}
+{{ pharmacy.name }}
+{% if pharmacy.open_now == True %} Open {% elif pharmacy.open_now == False %} Closed {% endif %} {% if pharmacy.delivery_available %} Delivery {% endif %}
+{{ pharmacy.address }}
+
+{% if pharmacy.distance != None %} {% icon 'MapPin' size=12 %} {{ pharmacy.distance }} mi {% endif %} {% icon 'Star' size=12 %} {% if pharmacy.rating %}{{ pharmacy.rating|floatformat:1 }}{% else %}No ratings{% endif %} {% icon 'Phone' size=12 %} {{ pharmacy.phone }} {% if pharmacy.open_now == None %} {% icon 'Clock' size=12 %} Hours not listed {% endif %}
+View Order
+{% empty %} {% include "partials/empty.html" with empty_icon="Building" empty_title="No pharmacies found" empty_text="Try a different search or clear your filters." %} {% endfor %}
+{% endblock %}
