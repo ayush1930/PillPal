@@ -1,0 +1,3 @@
+{% load pillpal_icons %} {% if status_tabs|length > 1 %}
+{% for tab in status_tabs %} {{ tab.label }} {{ tab.count }} {% endfor %}
+{% endif %}
