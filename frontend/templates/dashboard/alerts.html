@@ -1,0 +1,43 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Stock Alerts and Reorders</h1>
+      <p class="muted">Monitor low-stock medications and request replenishment.</p>
+    </div>
+  </div>
+  <div class="grid three compact-stats">
+    {% for label,value in inventory_stats %}
+      <article class="card">
+        <span class="muted small">{{ label }}</span>
+        <strong>{{ value }}</strong>
+      </article>
+    {% endfor %}
+  </div>
+  <section class="dashboard-section">
+    <div class="section-title">
+      <h2>Items Requiring Attention</h2>
+      <a href="{% url 'dashboard_section' 'reorders' %}">View Reorders</a>
+    </div>
+    {% for row in rows %}
+      {% with item=row.item %}
+        <article class="card stock-alert">
+          <span class="tile-icon">{% icon 'AlertTriangle' size=22 %}</span>
+          <div class="grow">
+            <h3>{{ item.medication.name }}</h3>
+            <p class="muted small">{{ item.pharmacy.name }} · {{ item.stock }} units remaining · Reorder level: {{ item.reorder_level }}</p>
+            <span class="badge {% if item.stock == 0 %}badge-closed{% else %}badge-rx{% endif %}">{% if item.stock == 0 %}Out of Stock{% else %}Low Stock{% endif %}</span>
+          </div>
+          <div class="card-actions">
+            <a class="button outline compact"
+              href="{% url 'resource_edit' 'inventory' item.pk %}">Update Stock</a>
+            <a class="button compact" href="{% url 'resource_create' 'reorders' %}">Request Reorder</a>
+          </div>
+        </article>
+      {% endwith %}
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="CheckCircle" empty_title="Stock levels look good" empty_text="Low-stock and out-of-stock alerts will appear here." %}
+    {% endfor %}
+  </section>
+{% endblock %}
