@@ -1,0 +1,31 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>System Settings</h1>
+      <p class="muted">Current platform configuration and account access.</p>
+    </div>
+  </div>
+  <div class="grid two">
+    <section class="card">
+      <h2>{% icon 'Settings' size=18 %} Platform Configuration</h2>
+      {% for label,value in settings_list %}
+        <div class="info-row">
+          <span>{{ label }}</span>
+          <strong>{{ value }}</strong>
+        </div>
+      {% endfor %}
+      <p class="muted small">Server configuration is managed in backend/.env.</p>
+    </section>
+    <section class="card">
+      <h2>{% icon 'Shield' size=18 %} Administration</h2>
+      <p class="muted small">Manage account roles and partner pharmacies from your dashboard.</p>
+      <div class="settings-links">
+        <a href="{% url 'dashboard_section' 'users' %}">{% icon 'Users' size=16 %} User Management {% icon 'ChevronRight' size=16 %}</a>
+        <a href="{% url 'dashboard_section' 'pharmacies' %}">{% icon 'Building' size=16 %} Pharmacy Management {% icon 'ChevronRight' size=16 %}</a>
+        <a href="{% url 'password_reset' %}">{% icon 'Shield' size=16 %} Reset Your Password {% icon 'ChevronRight' size=16 %}</a>
+      </div>
+    </section>
+  </div>
+{% endblock %}
