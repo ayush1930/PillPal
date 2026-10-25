@@ -1,0 +1,28 @@
+{% load pillpal_icons %}
+{{ form.non_field_errors }}
+<div class="field-grid">
+  {% for field in form %}
+    {% if field.is_hidden %}
+      {{ field }}{{ field.errors }}
+    {% else %}
+      <div class="form-field {% if field.name == 'file' or field.name == 'avatar' or field.name == 'description' or field.name == 'times' or field.name == 'comment' or field.name == 'notes' or field.name == 'opening_hours' or field.name == 'address' or field.name == 'response' %}wide-field{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.name == "file" %}
+          <div class="upload-zone" data-upload-zone>
+            <span class="tile-icon">{% icon 'FileText' size=28 %}</span>
+            <strong>Upload your prescription</strong>
+            <p>Drop a photo or PDF here, or choose a file.</p>
+            {{ field }}
+            <span class="selected-file" aria-live="polite"></span>
+          </div>
+        {% else %}
+          {{ field }}
+        {% endif %}
+        {{ field.errors }}
+        {% if field.help_text %}
+          <span class="helptext">{{ field.help_text }}</span>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>

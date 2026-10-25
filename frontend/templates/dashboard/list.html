@@ -1,0 +1,110 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>{{ page_title }}</h1>
+      <p class="muted">{{ subtitle }}</p>
+    </div>
+    <div class="card-actions">
+      {% if resource == "inventory" and can_create %}
+        <a class="button outline" href="{% url 'inventory_intake' %}">Add Medication Stock</a>
+      {% endif %}
+      {% if can_create and resource != "inventory" %}
+        <a class="button" href="{% url 'resource_create' resource %}">{% icon 'Plus' size=16 %} Add {{ resource|title }}</a>
+      {% endif %}
+      {% if invite %}
+        <a class="button" href="{% url 'invite_staff' %}">{% icon 'Users' size=16 %} Invite Staff</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if inventory_stats %}
+    <div class="grid three compact-stats">
+      {% for label,value in inventory_stats %}
+        <article class="card">
+          <span class="muted small">{{ label }}</span>
+          <strong>{{ value }}</strong>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="section-tabs">
+      <a class="{% if resource == 'inventory' %}active{% endif %}"
+        href="{% url 'dashboard_section' 'inventory' %}">Pharmacy Stock</a>
+      <a href="{% url 'dashboard_section' 'medications' %}">Medication Catalog</a>
+      <a href="{% url 'dashboard_section' 'suppliers' %}">Suppliers</a>
+      <a href="{% url 'dashboard_section' 'reorders' %}">Reorders</a>
+    </div>
+  {% endif %}
+  {% include "partials/filter_tabs.html" %}
+  <section class="card management-card">
+    <form method="get" class="search-sort" data-auto-submit>
+      <label class="search-input"><span>{% icon 'Search' size=16 %}</span><input type="search"
+        name="q"
+        value="{{ search }}"
+        placeholder="Search {{ page_title|lower }}..."
+        aria-label="Search"></label>
+      <input type="hidden" name="status" value="{{ status_filter }}">
+      {% if resource == "users" %}
+        <select name="role" aria-label="Filter by role">
+        <option value="">All Roles</option>
+        <option value="patient"
+          {% if selected_role == 'patient' %}selected{% endif %}>Patient</option>
+        <option value="pharmacist"
+          {% if selected_role == 'pharmacist' %}selected{% endif %}>Pharmacist</option>
+        <option value="driver" {% if selected_role == 'driver' %}selected{% endif %}>Driver</option>
+        <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>Admin</option>
+        </select>
+      {% endif %}
+      {% if categories %}
+        <select name="category" aria-label="Filter by category">
+        <option value="">All Categories</option>
+        {% for category in categories %}
+          <option value="{{ category }}"
+            {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+        {% endfor %}
+        </select>
+      {% endif %}
+      <button class="button outline compact">Search</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            {% for column in columns %}
+              <th>
+                {{ column }}
+              </th>
+            {% endfor %}
+            <th>
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              {% for value in row.values %}
+                <td>
+                  {% if value == "pending" or value == "approved" or value == "rejected" or value == "processing" or value == "ready" or value == "delivered" or value == "out_for_delivery" or value == "cancelled" %}
+                    <span class="badge badge-{{ value }}">{{ value|title }}</span>
+                  {% else %}
+                    {{ value }}
+                  {% endif %}
+                </td>
+              {% endfor %}
+              <td class="row-actions">
+                {% include "dashboard/row_actions.html" with item=row.item %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="10">
+                {% include "partials/empty.html" %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
