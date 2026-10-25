@@ -1,0 +1,47 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>{{ page_title }}</h1>
+      <p class="muted">{{ subtitle }}</p>
+    </div>
+    {% if user.role == "patient" %}
+      <a class="button" href="{% url 'resource_create' 'reviews' %}">{% icon 'Plus' size=16 %} Write Review</a>
+    {% endif %}
+  </div>
+  {% if review_average %}
+    <div class="card review-rating-summary">
+      <strong>{{ review_average|floatformat:1 }}</strong>
+      <div>
+        {% rating_stars review_average size=18 %}
+        <p class="muted small">Average from {{ rows|length }} review{{ rows|length|pluralize }}</p>
+      </div>
+    </div>
+  {% endif %}
+  <div class="review-list">
+    {% for row in rows %}
+      {% with review=row.item %}
+        <article class="card review-card">
+          <div class="card-title-line">
+            <div>
+              <h3>{{ review.pharmacy.name }}</h3>
+              <p class="muted small">Order #{{ review.order_id }} · {{ review.created_at|date:'M j, Y' }}</p>
+            </div>
+            {% rating_stars review.rating %}
+          </div>
+          <p class="review-comment">{{ review.comment|default:'No comment provided.' }}</p>
+          {% if user.role != "patient" %}
+            <p class="muted small">By {{ review.patient.name }}</p>
+          {% endif %}
+          {% if row.editable %}
+            <a class="link-button"
+              href="{% url 'resource_edit' 'reviews' review.pk %}">{% icon 'Edit' size=14 %} Edit Review</a>
+          {% endif %}
+        </article>
+      {% endwith %}
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Star" empty_title="No reviews yet" empty_text="Reviews from completed orders will appear here." %}
+    {% endfor %}
+  </div>
+{% endblock %}
