@@ -1,0 +1,35 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+
+{% block dashboard_content %}
+
+<!-- Page heading -->
+<div class="page-heading">
+  <div>
+    <h1>Add Medication Stock</h1>
+    <p class="muted">
+      Choose an existing medication or enter a new catalogue item,
+      then record the stock received.
+    </p>
+  </div>
+
+  <!-- Return to inventory -->
+  <a class="button outline"
+     href="{% url 'dashboard_section' 'inventory' %}">
+    Back to inventory
+  </a>
+</div>
+
+<!-- Medication stock form -->
+<section class="card form-card">
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+
+    <!-- Display form fields -->
+    {% include "dashboard/form_fields.html" %}
+
+    <button class="button">Save Medication Stock</button>
+  </form>
+</section>
+
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>{{ page_title }}</h1>
+      <p class="muted">{{ subtitle }}</p>
+    </div>
+  </div>
+  {% include "partials/filter_tabs.html" %}
+  <form method="get" class="search-form">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <label class="search-input"><span>{% icon 'Search' size=16 %}</span><input type="search"
+      name="q"
+      value="{{ search }}"
+      placeholder="Search orders..."
+      aria-label="Search orders"></label>
+    <button class="button outline">Search</button>
+  </form>
+  <div class="order-list">
+    {% for row in rows %}
+      {% with order=row.item %}
+        <article class="card full-order-card">
+          <div class="order-card-heading">
+            <div class="order-main">
+              <span class="tile-icon">{% icon 'Package' size=20 %}</span>
+              <div>
+                <h3>Order #{{ order.pk }}</h3>
+                <p class="muted small">{{ order.pharmacy.name }} · {{ order.created_at|date:'M j, Y' }}</p>
+              </div>
+            </div>
+            <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+          </div>
+          <div class="order-items">
+            {% for item in order.items.all %}
+              <span>{{ item.inventory_item.medication.name }} × {{ item.quantity }}</span>
+            {% endfor %}
+          </div>
+          <div class="order-card-footer">
+            <span class="muted small">{% icon 'Truck' size=14 %} {{ order.get_delivery_type_display }}{% if user.role != "patient" %} · {{ order.patient.name }}{% endif %}</span>
+            <div class="card-actions">
+              <strong class="mono">${{ order.total }}</strong>
+              <a class="button outline compact"
+                href="{% url 'order_detail' order.pk %}">View Details</a>
+              {% if order.status == "delivered" and user.role == "patient" %}
+                <a class="button compact" href="{% url 'resource_create' 'reviews' %}">{% icon 'Star' size=14 %} Rate Order</a>
+              {% endif %}
+              {% if user.role == "driver" and order.status == "ready" and not order.driver %}
+                <form method="post"
+                  action="{% url 'resource_action' 'orders' order.pk 'accept' %}">
+                  {% csrf_token %}
+                  <button class="button compact">Accept Delivery</button>
+                </form>
+              {% endif %}
+              {% if user.role == "pharmacist" and order.status == "pending" %}
+                <form method="post"
+                  action="{% url 'resource_action' 'orders' order.pk 'status' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="status" value="processing">
+                  <button class="button compact">Accept Order</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% endwith %}
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Package" empty_title="No orders found" %}
+    {% endfor %}
+  </div>
+{% endblock %}

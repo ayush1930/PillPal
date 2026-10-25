@@ -1,0 +1,231 @@
+
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+
+{% block dashboard_content %}
+
+<!-- Back to pharmacies -->
+<a class="back-link" href="{% url 'dashboard_section' 'pharmacies' %}">
+  {% icon 'ChevronLeft' size=16 %} Back to pharmacies
+</a>
+
+<!-- Pharmacy heading and information -->
+<div class="page-heading">
+  <div>
+    <div class="card-title-line">
+      <h1>{{ pharmacy.name }}</h1>
+
+      {% if pharmacy.open_now == True %}
+        <span class="badge badge-open">Open</span>
+      {% endif %}
+
+      {% if pharmacy.delivery_available %}
+        <span class="badge badge-delivery">Delivery Available</span>
+      {% endif %}
+    </div>
+
+    <p class="muted">{{ pharmacy.address }} · {{ pharmacy.phone }}</p>
+  </div>
+
+  <a class="button outline" href="{% url 'cart' %}">
+    {% icon 'ShoppingCart' size=16 %} View Cart
+  </a>
+</div>
+
+<!-- Switch between catalogue and pharmacy details -->
+<div class="section-tabs">
+  <a class="{% if not profile_view %}active{% endif %}"
+     href="{% url 'catalogue' pharmacy.pk %}">
+    Shop Medications
+  </a>
+
+  <a class="{% if profile_view %}active{% endif %}"
+     href="{% url 'catalogue' pharmacy.pk %}?view=profile">
+    Pharmacy Details
+  </a>
+</div>
+
+{% if profile_view %}
+
+  <!-- Pharmacy details -->
+  <div class="grid two">
+    <section class="card">
+      <h2>Pharmacy Information</h2>
+
+      <div class="info-row">
+        <span>Address</span>
+        <strong>{{ pharmacy.address }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Phone</span>
+        <strong>{{ pharmacy.phone }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Email</span>
+        <strong>{{ pharmacy.email|default:'—' }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Delivery</span>
+        <strong>{{ pharmacy.delivery_available|yesno:'Available,Pickup only' }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Rating</span>
+        <strong>
+          {% if pharmacy.rating %}
+            {{ pharmacy.rating|floatformat:1 }} / 5
+          {% else %}
+            Not rated yet
+          {% endif %}
+        </strong>
+      </div>
+
+      <a class="button" href="{% url 'catalogue' pharmacy.pk %}">
+        Browse Medications
+      </a>
+    </section>
+
+    <!-- Pharmacy staff -->
+    <section class="card">
+      <h2>Pharmacists on Staff</h2>
+
+      {% for member in staff %}
+        <div class="person-row">
+          <span class="avatar small-avatar">
+            {{ member.user.first_name|first }}{{ member.user.last_name|first }}
+          </span>
+
+          <div>
+            <strong>{{ member.user.name }}</strong>
+            <p class="muted small">
+              {{ member.is_manager|yesno:'Pharmacy Manager,Pharmacist' }}
+            </p>
+          </div>
+        </div>
+      {% empty %}
+        <p class="muted">No staff profiles listed.</p>
+      {% endfor %}
+    </section>
+  </div>
+
+{% else %}
+
+  <!-- Search and filter medications -->
+  <form method="get" class="search-sort" data-auto-submit>
+    <label class="search-input">
+      <span>{% icon 'Search' size=16 %}</span>
+      <input type="search"
+             name="q"
+             value="{{ search }}"
+             placeholder="Search medications..."
+             aria-label="Search medications">
+    </label>
+
+    <select name="category" aria-label="Medication category">
+      <option value="">All Categories</option>
+
+      {% for category in categories %}
+        <option value="{{ category }}"
+          {% if selected_category == category %}selected{% endif %}>
+          {{ category }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <button class="button outline">Search</button>
+  </form>
+
+  <!-- Medication catalogue -->
+  <div class="grid three medication-grid">
+    {% for item in inventory %}
+      <article class="card medication-card {% if item.stock == 0 %}out-of-stock{% endif %}">
+
+        <div class="card-title-line">
+          <div>
+            <h3>{{ item.medication.name }}</h3>
+            <p class="muted small">{{ item.medication.generic_name }}</p>
+          </div>
+
+          <span class="category-label">
+            {{ item.medication.category }}
+          </span>
+        </div>
+
+        <p class="muted small medication-description">
+          {{ item.medication.description }}
+        </p>
+
+        <!-- Prescription and stock status -->
+        <div class="meta-line">
+          {% if item.medication.requires_prescription %}
+            <span class="badge badge-rx">Rx Required</span>
+          {% endif %}
+
+          <span class="badge {% if item.stock %}badge-open{% else %}badge-closed{% endif %}">
+            {% if item.stock %}
+              In Stock ({{ item.stock }})
+            {% else %}
+              Out of Stock
+            {% endif %}
+          </span>
+        </div>
+
+        <!-- Medication price and add to cart -->
+        <div class="medication-footer">
+          <strong class="price">${{ item.price }}</strong>
+
+          <form method="post"
+                action="{% url 'cart_update' item.pk %}"
+                class="quantity-form">
+            {% csrf_token %}
+
+            <input type="number"
+                   name="quantity"
+                   value="1"
+                   min="1"
+                   max="{{ item.stock }}"
+                   aria-label="Quantity">
+
+            <button class="button compact"
+                    {% if item.stock == 0 %}disabled{% endif %}>
+              Add to Cart
+            </button>
+          </form>
+        </div>
+      </article>
+
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Pill" empty_title="No medications available" %}
+    {% endfor %}
+  </div>
+
+{% endif %}
+
+<!-- Pharmacy reviews -->
+<details class="card pharmacy-review-section">
+  <summary>
+    {% icon 'Star' size=18 %}
+    Your Reviews for {{ pharmacy.name }}
+    <span class="muted small">Show / Hide</span>
+  </summary>
+
+  {% for review in pharmacy_reviews %}
+    <div class="review-entry">
+      {% rating_stars review.rating %}
+      <p>{{ review.comment }}</p>
+      <span class="muted small">
+        {{ review.created_at|date:'M j, Y' }}
+      </span>
+    </div>
+
+  {% empty %}
+    <p class="muted small">
+      You can review this pharmacy after receiving an order.
+    </p>
+  {% endfor %}
+</details>
+
+{% endblock %}

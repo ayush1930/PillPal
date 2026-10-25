@@ -1,0 +1,234 @@
+
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+
+{% block dashboard_content %}
+
+<a class="back-link" href="{% url 'dashboard_section' 'orders' %}">
+  {% icon 'ChevronLeft' size=16 %} Back to orders
+</a>
+
+<div class="page-heading">
+  <div>
+    <h1>Order #{{ order.pk }}</h1>
+    <p class="muted">
+      {{ order.created_at|date:'M j, Y, g:i A' }} · {{ order.pharmacy.name }}
+    </p>
+  </div>
+
+  <span class="badge badge-{{ order.status }}">
+    {{ order.get_status_display }}
+  </span>
+</div>
+
+<section class="card">
+  {% include "orders/progress.html" %}
+</section>
+
+<div class="order-detail-grid">
+  <div>
+    <section class="card">
+      <h2>Medications</h2>
+
+      {% for item in order.items.all %}
+        <div class="checkout-item">
+          <span class="tile-icon small-tile">
+            {% icon 'Pill' size=18 %}
+          </span>
+
+          <div class="grow">
+            <strong>{{ item.inventory_item.medication.name }}</strong>
+            <p class="muted small">Quantity: {{ item.quantity }}</p>
+          </div>
+
+          <strong class="mono">${{ item.unit_price }} each</strong>
+        </div>
+      {% endfor %}
+    </section>
+
+    <section class="card">
+      <h2>{% icon 'Building' size=18 %} Pharmacy &amp; Delivery</h2>
+
+      <div class="grid two">
+        <div>
+          <h3>{{ order.pharmacy.name }}</h3>
+          <p class="muted small">{{ order.pharmacy.address }}</p>
+          <a href="tel:{{ order.pharmacy.phone }}">
+            {{ order.pharmacy.phone }}
+          </a>
+        </div>
+
+        <div>
+          <h3>{{ order.get_delivery_type_display }}</h3>
+
+          {% if order.proof_of_delivery %}
+            <a href="{{ order.proof_of_delivery.url }}"
+               target="_blank"
+               rel="noopener">
+              View delivery proof
+            </a>
+          {% endif %}
+
+          {% if order.delivery_address %}
+            <p class="muted small">
+              {{ order.delivery_address.street }},
+              {{ order.delivery_address.city }}
+            </p>
+          {% endif %}
+
+          {% if order.driver %}
+            <p class="muted small">
+              Driver: {{ order.driver.name }}
+              <br>
+              {{ order.driver.phone }}
+            </p>
+          {% endif %}
+
+          {% if order.delivered_at %}
+            <span class="badge badge-open">
+              Delivered {{ order.delivered_at|date:'M j, g:i A' }}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <section class="card">
+      <h2>Order Summary</h2>
+
+      <p>Payment: cash on delivery or collection.</p>
+
+      <p>
+        {% if order.cash_collected %}
+          <span class="badge">Cash collected</span>
+        {% else %}
+          <span class="badge">Cash pending</span>
+        {% endif %}
+      </p>
+
+      <div class="info-row">
+        <span>Subtotal</span>
+        <strong>${{ order.subtotal }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Delivery</span>
+        <strong>${{ order.delivery_fee }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Tax</span>
+        <strong>${{ order.tax }}</strong>
+      </div>
+
+      <div class="info-row total-row">
+        <span>Total</span>
+        <strong>${{ order.total }}</strong>
+      </div>
+
+      {% if user.role == "patient" and order.status == "delivered" %}
+        <a class="button full"
+           href="{% url 'resource_create' 'reviews' %}">
+          {% icon 'Star' size=16 %} Rate Your Order
+        </a>
+      {% endif %}
+    </section>
+
+    <section class="card order-action-panel">
+      <h2>Order Actions</h2>
+
+      {% if user.role == "patient" %}
+        <a class="button outline full"
+           href="{% url 'dispute_create' %}?order={{ order.pk }}">
+          {% icon 'AlertCircle' size=16 %} Report a Problem
+        </a>
+
+        <a class="small" href="{% url 'disputes' %}?q={{ order.pk }}">
+          View order disputes
+        </a>
+      {% endif %}
+
+      {% if user.role == "pharmacist" or user.role == "admin" %}
+        {% if order.status == "ready" and order.delivery_type == "pickup" %}
+          <form method="post"
+                action="{% url 'resource_action' 'orders' order.pk 'deliver' %}">
+            {% csrf_token %}
+            <button class="button full">Confirm Pickup</button>
+          </form>
+        {% endif %}
+      {% endif %}
+
+      {% if user.role != "patient" and order.status == "delivered" and not order.cash_collected %}
+        <form method="post"
+              action="{% url 'resource_action' 'orders' order.pk 'paid' %}"
+              data-confirm="Confirm you have received the cash payment?">
+          {% csrf_token %}
+          <button class="button full">Record Cash Collected</button>
+        </form>
+      {% endif %}
+
+      {% if user.role == "pharmacist" or user.role == "admin" %}
+        {% if order.status == "pending" or order.status == "processing" or order.status == "ready" %}
+          <form method="post"
+                action="{% url 'resource_action' 'orders' order.pk 'status' %}"
+                class="form-stack">
+            {% csrf_token %}
+
+            <select name="status" aria-label="Next order status">
+              {% if order.status == "pending" %}
+                <option value="processing">Accept / Start Processing</option>
+              {% elif order.status == "processing" %}
+                <option value="ready">Mark Ready</option>
+              {% endif %}
+
+              <option value="cancelled">Cancel Order</option>
+            </select>
+
+            <button class="button full">Update Status</button>
+          </form>
+        {% endif %}
+      {% endif %}
+
+      {% if user.role == "driver" or user.role == "admin" %}
+        {% if order.status == "ready" and not order.driver %}
+          <form method="post"
+                action="{% url 'resource_action' 'orders' order.pk 'accept' %}">
+            {% csrf_token %}
+
+            <button class="button full">
+              {% icon 'Truck' size=16 %} Accept Delivery
+            </button>
+          </form>
+
+        {% elif order.status == "out_for_delivery" %}
+          <form method="post"
+                enctype="multipart/form-data"
+                action="{% url 'resource_action' 'orders' order.pk 'deliver' %}">
+            {% csrf_token %}
+
+            <label>
+              Delivery proof (optional)
+              <input type="file"
+                     name="proof_of_delivery"
+                     accept="image/*">
+            </label>
+
+            <button class="button full">
+              {% icon 'CheckCircle' size=16 %} Mark Delivered
+            </button>
+          </form>
+        {% endif %}
+      {% endif %}
+
+      {% if user.role == "patient" and order.status != "delivered" %}
+        <p class="muted small">
+          Your pharmacy will update this order as it is prepared.
+        </p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+
+{% endblock %}
