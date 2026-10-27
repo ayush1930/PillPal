@@ -1,0 +1,47 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Order Status</h1>
+      <p class="muted">Follow your active orders from pharmacy to delivery.</p>
+    </div>
+  </div>
+  {% for row in rows %}
+    {% with order=row.item %}
+      <section class="card tracking-card">
+        <div class="section-title">
+          <div>
+            <h2>Order #{{ order.pk }}</h2>
+            <p class="muted small">{{ order.pharmacy.name }}</p>
+          </div>
+          <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+        </div>
+        {% include "orders/progress.html" %}
+        <div class="grid two">
+          <div class="tracking-info">
+            <h3>{% icon 'Building' size=16 %} Pharmacy</h3>
+            <strong>{{ order.pharmacy.name }}</strong>
+            <p class="muted small">{{ order.pharmacy.address }}</p>
+            <a href="tel:{{ order.pharmacy.phone }}">{{ order.pharmacy.phone }}</a>
+          </div>
+          <div class="tracking-info">
+            <h3>{% icon 'Truck' size=16 %} Delivery</h3>
+            {% if order.driver %}
+              <strong>{{ order.driver.name }}</strong>
+              <p class="muted small">{{ order.driver.phone }}</p>
+            {% else %}
+              <p class="muted">Driver assignment pending.</p>
+            {% endif %}
+            {% if order.estimated_delivery %}
+              <p>Estimated arrival: {{ order.estimated_delivery|date:'g:i A' }}</p>
+            {% endif %}
+          </div>
+        </div>
+        <a class="button outline" href="{% url 'order_detail' order.pk %}">View Order Details</a>
+      </section>
+    {% endwith %}
+  {% empty %}
+    {% include "partials/empty.html" with empty_icon="MapPin" empty_title="No active orders to track" empty_text="Your order progress will appear here after checkout." %}
+  {% endfor %}
+{% endblock %}
