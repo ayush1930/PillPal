@@ -1,0 +1,67 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Prescriptions</h1>
+      <p class="muted">Upload and manage your prescriptions.</p>
+    </div>
+    <a class="button" href="{% url 'resource_create' 'prescriptions' %}">{% icon 'Plus' size=16 %} Upload New</a>
+  </div>
+  {% include "partials/filter_tabs.html" %}
+  <div class="grid two prescription-grid">
+    {% for row in rows %}
+      {% with rx=row.item %}
+        <article class="card prescription-card">
+          <div class="card-title-line">
+            <span class="tile-icon">{% icon 'FileText' size=22 %}</span>
+            <span class="badge badge-{{ rx.status }}">{{ rx.get_status_display }}</span>
+          </div>
+          <h3>{{ rx.medication_name }}</h3>
+          <p class="muted small">{{ rx.doctor_name }}</p>
+          <div class="prescription-meta">
+            <span>Issued <strong>{{ rx.issue_date|date:'M j, Y' }}</strong></span>
+            <span>Expires <strong>{{ rx.expiry_date|date:'M j, Y' }}</strong></span>
+          </div>
+          {% if rx.kind %}
+            <div class="meta-line">
+              <span class="badge">{{ rx.get_kind_display }}</span>
+              {% if rx.kind == "repeat" %}
+                <span class="muted small">{{ rx.refills_remaining }} refill{{ rx.refills_remaining|pluralize }} remaining</span>
+              {% endif %}
+            </div>
+          {% endif %}
+          {% if rx.review_notes %}
+            <p class="rx-notes">{{ rx.review_notes }}</p>
+          {% endif %}
+          <div class="card-footer">
+            <a class="button outline compact"
+              href="{% url 'prescription_file' rx.pk %}"
+              target="_blank"
+              rel="noopener">{% icon 'Eye' size=14 %} View File</a>
+            {% if rx.status == "approved" and rx.kind == "repeat" %}
+              <form method="post"
+                action="{% url 'resource_action' 'prescriptions' rx.pk 'refill' %}">
+                {% csrf_token %}
+                <button class="button compact">{% icon 'RefreshCw' size=14 %} Refill</button>
+              </form>
+            {% endif %}
+            {% if row.editable %}
+              <a class="icon-link"
+                href="{% url 'resource_edit' 'prescriptions' rx.pk %}"
+                aria-label="Edit prescription">{% icon 'Edit' size=16 %}</a>
+              <form method="post"
+                action="{% url 'resource_action' 'prescriptions' rx.pk 'delete' %}"
+                data-confirm="Delete this prescription?">
+                {% csrf_token %}
+                <button class="icon-link danger" aria-label="Delete prescription">{% icon 'Trash' size=16 %}</button>
+              </form>
+            {% endif %}
+          </div>
+        </article>
+      {% endwith %}
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="FileText" empty_title="No prescriptions yet" empty_text="Upload a photo or PDF to submit a prescription for review." %}
+    {% endfor %}
+  </div>
+{% endblock %}
