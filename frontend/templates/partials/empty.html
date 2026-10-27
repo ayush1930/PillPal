@@ -1,0 +1,6 @@
+{% load pillpal_icons %}
+<div class="empty-state">
+  <span class="empty-symbol">{% icon empty_icon|default:'Inbox' size=28 %}</span>
+  <h3>{{ empty_title|default:'No records yet' }}</h3>
+  <p class="muted">{{ empty_text|default:'Records will appear here as you use PillPal.' }}</p>
+</div>
