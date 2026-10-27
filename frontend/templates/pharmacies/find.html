@@ -1,0 +1,103 @@
+{% extends "dashboard/base.html" %}
+{% load pillpal_icons %}
+{% block dashboard_content %}
+  <div class="page-heading">
+    <div>
+      <h1>Find a Pharmacy</h1>
+      <p class="muted">Browse partner pharmacies or search for a specific medication.</p>
+    </div>
+  </div>
+  <section class="card med-cross-search">
+    <h3>{% icon 'Search' size=16 %} Search Medications Across Pharmacies</h3>
+    <form method="get">
+      <label class="search-input tinted-input"><span>{% icon 'Search' size=16 %}</span><input name="med"
+        value="{{ med_search }}"
+        type="search"
+        minlength="2"
+        placeholder="e.g. Lisinopril, Ibuprofen..."
+        aria-label="Search medications across pharmacies"><button class="button compact" type="submit">Search medications</button></label>
+    </form>
+    <div id="medication-results">
+      {% include "pharmacies/med_results.html" %}
+    </div>
+  </section>
+  <form method="get" class="pharmacy-filters" data-auto-submit>
+    <input type="hidden" name="med" value="{{ med_search }}">
+    <div class="search-sort">
+      <label class="search-input"><span>{% icon 'Search' size=16 %}</span><input name="q"
+        value="{{ search }}"
+        type="search"
+        placeholder="Search by name or address..."
+        aria-label="Search by name or address"></label>
+      <select name="sort" aria-label="Sort pharmacies">
+      <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Rating (Highest)</option>
+      <option value="name" {% if sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
+      <option value="distance" {% if sort == 'distance' %}selected{% endif %}>Distance (Nearest)</option>
+      </select>
+      <button class="button compact">Search</button>
+    </div>
+    <div class="filter-pills">
+      <span class="muted">Filter:</span>
+      <label class="filter-chip"><input type="checkbox"
+        name="open"
+        value="1"
+        {% if open_filter %}checked{% endif %}><span>Open Now</span></label>
+      <label class="filter-chip"><input type="checkbox"
+        name="delivery"
+        value="1"
+        {% if delivery_filter %}checked{% endif %}><span>Delivery Available</span></label>
+      <label class="filter-chip"><input type="radio"
+        name="rating"
+        value="4"
+        {% if rating_filter == '4' %}checked{% endif %}><span>Rating ≥ 4 {% icon 'Star' size=11 %}</span></label>
+      <label class="filter-chip"><input type="radio"
+        name="rating"
+        value="4.5"
+        {% if rating_filter == '4.5' %}checked{% endif %}><span>Rating ≥ 4.5 {% icon 'Star' size=11 %}</span></label>
+      {% if has_filters %}
+        <a class="clear-filter"
+          href="{% query_url open='' delivery='' rating='' %}">Clear filters</a>
+      {% endif %}
+    </div>
+  </form>
+  <div class="pharmacy-list">
+    {% for pharmacy in pharmacies %}
+      <article class="card pharmacy-card">
+        <div class="pharmacy-main">
+          <span class="tile-icon">{% icon 'Building' size=22 %}</span>
+          <div>
+            <div class="card-title-line">
+              <h3>{{ pharmacy.name }}</h3>
+              {% if pharmacy.open_now == True %}
+                <span class="badge badge-open">Open</span>
+              {% elif pharmacy.open_now == False %}
+                <span class="badge badge-closed">Closed</span>
+              {% endif %}
+              {% if pharmacy.delivery_available %}
+                <span class="badge badge-delivery">Delivery</span>
+              {% endif %}
+            </div>
+            <p class="address-line">{{ pharmacy.address }}</p>
+            <div class="meta-line">
+              {% if pharmacy.distance != None %}
+                <span title="Straight-line distance from your saved address">{% icon 'MapPin' size=12 %} {{ pharmacy.distance }} mi</span>
+              {% endif %}
+              <span>{% icon 'Star' size=12 %} {% if pharmacy.rating %}{{ pharmacy.rating|floatformat:1 }}{% else %}No ratings{% endif %}</span>
+              <span>{% icon 'Phone' size=12 %} {{ pharmacy.phone }}</span>
+              {% if pharmacy.open_now == None %}
+                <span>{% icon 'Clock' size=12 %} Hours not listed</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <a class="button outline compact"
+            href="{% url 'catalogue' pharmacy.pk %}?view=profile">View</a>
+          <a class="button compact" href="{% url 'catalogue' pharmacy.pk %}">Order</a>
+        </div>
+      </article>
+    {% empty %}
+      {% include "partials/empty.html" with empty_icon="Building" empty_title="No pharmacies found" empty_text="Try a different search or clear your filters." %}
+    {% endfor %}
+  </div>
+{% endblock %}
