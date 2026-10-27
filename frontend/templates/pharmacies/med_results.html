@@ -1,0 +1,28 @@
+{% load pillpal_icons %}
+{% if med_search|length >= 2 %}
+  <div class="med-results">
+    <p class="muted small">{{ med_results|length }} medication offer{{ med_results|length|pluralize }} found</p>
+    {% for item in med_results %}
+      <div class="med-result-row">
+        <div>
+          <strong>{{ item.medication.name }}</strong>
+          <span class="muted small">({{ item.medication.generic_name }})</span>
+          <div class="meta-line">
+            <span>{{ item.pharmacy.name }}</span>
+            {% if item.medication.requires_prescription %}
+              <span class="badge badge-rx">Rx Required</span>
+            {% endif %}
+            <span class="badge badge-open">In Stock ({{ item.stock }})</span>
+          </div>
+        </div>
+        <div class="card-actions">
+          <strong class="price">${{ item.price }}</strong>
+          <a class="button compact"
+            href="{% url 'catalogue' item.pharmacy_id %}?q={{ item.medication.name|urlencode }}">Order</a>
+        </div>
+      </div>
+    {% empty %}
+      <p class="empty">No medications found matching “{{ med_search }}”.</p>
+    {% endfor %}
+  </div>
+{% endif %}
