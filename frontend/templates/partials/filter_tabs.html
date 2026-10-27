@@ -1,0 +1,9 @@
+{% load pillpal_icons %}
+{% if status_tabs|length > 1 %}
+  <div class="status-tabs">
+    {% for tab in status_tabs %}
+      <a class="{% if status_filter == tab.key %}active{% endif %}"
+        href="{% query_url status=tab.key %}">{{ tab.label }} <span>{{ tab.count }}</span></a>
+    {% endfor %}
+  </div>
+{% endif %}
