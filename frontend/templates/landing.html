@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% load pillpal_icons %}
+{% load static %}
+{% block content %}
+  <nav class="landing-nav">
+    <div class="container nav-inner">
+      {% include "partials/logo.html" %}
+      <div class="nav-links">
+        <a href="#about">About Us</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#testimonials">Reviews</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="actions">
+        <a href="{% url 'auth' %}" class="button secondary">Sign In</a>
+        <a href="{% url 'auth' %}?mode=register" class="button">Get Started</a>
+      </div>
+    </div>
+  </nav>
+  <main>
+    <section class="container hero" id="hero">
+      <div>
+        <span class="badge">Your pharmacy, closer to home</span>
+        <h1>Your prescriptions,<br><em>delivered with care.</em></h1>
+        <p class="lead">Upload your prescription, choose your pharmacy, and receive your medications at your door — all in one seamless platform.</p>
+        <div class="actions">
+          <a href="{% url 'auth' %}?mode=register" class="button large">Start Your Free Account</a>
+          <a href="{% url 'auth' %}" class="button outline large">Sign In</a>
+        </div>
+        <p class="muted small">Prescription management · Pharmacy network · Medication reminders</p>
+      </div>
+      <div class="hero-visual">
+        <img src="{% static 'images/pillpal-hero.jpeg' %}"
+          alt="White medicine bottle and capsules floating above a glowing teal platform">
+        <div class="floating-card">
+          <span class="status-icon">{% icon "CheckCircle" size=22 %}</span>
+          <div>
+            <strong>Care at your doorstep</strong>
+            <p class="muted small">View your order status from pharmacy to delivery.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="landing-stat-strip">
+      <div class="container grid four">
+        <div>
+          <strong>{{ pharmacy_count }}</strong>
+          <span>Partner Pharmacies</span>
+        </div>
+        <div>
+          <strong>{{ medication_count }}</strong>
+          <span>Medications Available</span>
+        </div>
+        <div>
+          <strong>{{ delivered_count }}</strong>
+          <span>Completed Orders</span>
+        </div>
+        <div>
+          <strong>{{ review_count }}</strong>
+          <span>Patient Reviews</span>
+        </div>
+      </div>
+    </section>
+    <section class="section container" id="about">
+      <div class="grid two about-grid">
+        <div>
+          <span class="eyebrow">ABOUT PILLPAL</span>
+          <h2>Making medication<br>management effortless</h2>
+          <p class="muted">PillPal connects patients with pharmacies to make prescription management and medication delivery simpler.</p>
+          <p class="muted">Upload prescriptions for pharmacist review, browse available medication, and follow your order from pharmacy to doorstep.</p>
+          <div class="grid two about-facts">
+            <div>
+              <strong>{{ pharmacy_count }}</strong>
+              <span>Partner Pharmacies</span>
+            </div>
+            <div>
+              <strong>{{ medication_count }}</strong>
+              <span>Medications Available</span>
+            </div>
+            <div>
+              <strong>{{ delivered_count }}</strong>
+              <span>Completed Orders</span>
+            </div>
+            <div>
+              <strong>{{ review_count }}</strong>
+              <span>Patient Reviews</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-values">
+          <article class="card about-value">
+            <span class="feature-icon">{% icon "Shield" size=20 %}</span>
+            <div>
+              <h3>Privacy First</h3>
+              <p>Your account keeps your prescriptions and order history together.</p>
+            </div>
+          </article>
+          <article class="card about-value">
+            <span class="feature-icon">{% icon "CheckCircle" size=20 %}</span>
+            <div>
+              <h3>Pharmacist Review</h3>
+              <p>Prescriptions are reviewed before use in medication orders.</p>
+            </div>
+          </article>
+          <article class="card about-value">
+            <span class="feature-icon">{% icon "Clock" size=20 %}</span>
+            <div>
+              <h3>Order Tracking</h3>
+              <p>Follow each order from processing through delivery.</p>
+            </div>
+          </article>
+          <article class="card about-value">
+            <span class="feature-icon">{% icon "User" size=20 %}</span>
+            <div>
+              <h3>Patient-Centered Design</h3>
+              <p>Manage prescriptions, repeat refills, and medication schedules.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="section container" id="features">
+      <div class="section-heading">
+        <h2>Everything you need</h2>
+        <p class="lead">A complete pharmacy platform built around your health and convenience.</p>
+      </div>
+      <div class="grid three">
+        <article class="card feature">
+          <span class="feature-icon">{% icon "FileText" size=22 %}</span>
+          <h3>Prescription Upload</h3>
+          <p>Upload your prescription photo or PDF for pharmacist verification.</p>
+        </article>
+        <article class="card feature">
+          <span class="feature-icon">{% icon "Truck" size=22 %}</span>
+          <h3>Doorstep Delivery</h3>
+          <p>Choose delivery or pickup and follow the status of your order.</p>
+        </article>
+        <article class="card feature">
+          <span class="feature-icon">{% icon "Bell" size=22 %}</span>
+          <h3>Medication Reminders</h3>
+          <p>Keep your medication schedule and dosage information together.</p>
+        </article>
+        <article class="card feature">
+          <span class="feature-icon">{% icon "Building" size=22 %}</span>
+          <h3>Multi-Pharmacy Network</h3>
+          <p>Browse pharmacy profiles, medication availability and prices.</p>
+        </article>
+        <article class="card feature">
+          <span class="feature-icon">{% icon "Package" size=22 %}</span>
+          <h3>Prescription Refills</h3>
+          <p>Request refills when your verified prescription is eligible.</p>
+        </article>
+        <article class="card feature">
+          <span class="feature-icon">{% icon "Star" size=22 %}</span>
+          <h3>Rated &amp; Reviewed</h3>
+          <p>Share your experience after your order has been delivered.</p>
+        </article>
+      </div>
+    </section>
+    <section class="how-section section" id="how-it-works">
+      <div class="container">
+        <div class="section-heading">
+          <h2>How PillPal works</h2>
+          <p class="lead">From prescription to doorstep in four steps.</p>
+        </div>
+        <div class="grid four process-steps">
+          <article>
+            <span class="step">01</span>
+            <h3>Create account</h3>
+            <p class="muted">Sign up as a patient in under 2 minutes.</p>
+          </article>
+          <article>
+            <span class="step">02</span>
+            <h3>Upload prescription</h3>
+            <p class="muted">Snap a photo or upload a PDF of your prescription.</p>
+          </article>
+          <article>
+            <span class="step">03</span>
+            <h3>Choose pharmacy</h3>
+            <p class="muted">Compare prices and choose from nearby partner pharmacies.</p>
+          </article>
+          <article>
+            <span class="step">04</span>
+            <h3>Receive delivery</h3>
+            <p class="muted">Track your order status and receive it at your door.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="section container" id="testimonials">
+      <div class="section-heading">
+        <h2>Pharmacy reviews</h2>
+        <p class="lead">Ratings from completed PillPal orders.</p>
+      </div>
+      <div class="grid three">
+        {% for pharmacy in rated_pharmacies %}
+          <article class="card review-card">
+            <div class="rating-stars">
+              {% icon "Star" size=14 %}
+              {% icon "Star" size=14 %}
+              {% icon "Star" size=14 %}
+              {% icon "Star" size=14 %}
+              {% icon "Star" size=14 %}
+            </div>
+            <h3>{{ pharmacy.name }}</h3>
+            <p class="muted">{{ pharmacy.rating|floatformat:1 }} / 5 from {{ pharmacy.review_count }} review{{ pharmacy.review_count|pluralize }}</p>
+            <a href="{% url 'auth' %}">Explore this pharmacy {% icon "ChevronRight" size=14 %}</a>
+          </article>
+        {% empty %}
+          <article class="card review-card">
+            <span class="feature-icon">{% icon "Star" size=22 %}</span>
+            <h3>Share your experience</h3>
+            <p class="muted">Patients can rate their pharmacy after receiving an order.</p>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="cta-strip">
+      <div class="container">
+        <h2>Ready to simplify your medication routine?</h2>
+        <p>Manage your prescriptions and pharmacy orders in one place.</p>
+        <a class="button white large" href="{% url 'auth' %}?mode=register">Create Your Free Account</a>
+      </div>
+    </section>
+    <section class="section contact-section" id="contact">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">GET IN TOUCH</span>
+          <h2>Contact Us</h2>
+          <p class="lead">Have questions or need support? Our team is here to help.</p>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <span class="feature-icon">{% icon "Building" size=22 %}</span>
+            <h3>Your Pharmacy</h3>
+            <p class="muted">For questions about dispensing or collection, contact your selected pharmacy using its profile.</p>
+          </article>
+          <article class="card">
+            <span class="feature-icon">{% icon "Phone" size=22 %}</span>
+            <h3>Phone &amp; Email</h3>
+            <p class="muted">Your pharmacy's contact details are available in your account.</p>
+            <a href="mailto:support@pillpal.com">support@pillpal.com</a>
+          </article>
+          <article class="card">
+            <span class="feature-icon">{% icon "Clock" size=22 %}</span>
+            <h3>Opening Hours</h3>
+            <p class="muted">Check your pharmacy profile for current hours and delivery availability.</p>
+          </article>
+        </div>
+        <div class="card contact-form-card">
+          <h3>Send us a message</h3>
+          <form method="post" action="{% url 'contact' %}" class="form-stack">
+            {% csrf_token %}
+            <div class="grid two">
+              <label>Full Name<input name="name"
+                type="text"
+                maxlength="150"
+                placeholder="Jane Smith"
+                required></label>
+              <label>Email Address<input name="email" type="email" placeholder="jane@example.com" required></label>
+            </div>
+            <label>Subject<input name="subject"
+              type="text"
+              maxlength="200"
+              placeholder="How can we help?"
+              required></label>
+            <label>Message<textarea name="message"
+              maxlength="5000"
+              rows="4"
+              placeholder="Tell us more about your question or issue..."
+              required></textarea></label>
+            <button class="button" type="submit">{% icon "Send" size=16 %} Send Message</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <div class="grid four">
+        <div>
+          {% include "partials/logo.html" %}
+          <p class="muted small">Connecting patients with pharmacies for prescription management and delivery.</p>
+        </div>
+        <div>
+          <strong>Platform</strong>
+          <a href="#about">About Us</a>
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#testimonials">Reviews</a>
+        </div>
+        <div>
+          <strong>Your Account</strong>
+          <a href="{% url 'auth' %}">Sign In</a>
+          <a href="{% url 'auth' %}?mode=register">Create Account</a>
+          <a href="{% url 'password_reset' %}">Password Reset</a>
+        </div>
+        <div>
+          <strong>Contact</strong>
+          <a href="#contact">Contact Us</a>
+          <a href="mailto:support@pillpal.com">support@pillpal.com</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="muted small">© {% now "Y" %} PillPal. All rights reserved.</span>
+        <span class="muted small">{% icon "Shield" size=14 %} Prescription management and pharmacy delivery</span>
+      </div>
+    </div>
+  </footer>
+{% endblock %}

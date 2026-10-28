@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PillPal{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/pillpal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    {% block styles %}
+    {% endblock %}
+  </head>
+  <body>
+    {% if messages %}
+      <div class="messages" role="status">
+        {% for message in messages %}
+          <p class="message {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}
+    {% endblock %}
+    {% block scripts %}
+    {% endblock %}
+    <script src="{% static 'js/pillpal.js' %}" defer></script>
+  </body>
+</html>
