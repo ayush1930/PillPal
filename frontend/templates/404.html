@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load pillpal_icons %}
+
+{% block title %}Page not found | PillPal{% endblock %}
+
+{% block content %}
+  <main class="not-found-page">
+    <div class="not-found-brand">
+      {% include "partials/logo.html" %}
+    </div>
+    <section class="not-found-card" aria-labelledby="not-found-title">
+      <span class="not-found-symbol" aria-hidden="true">
+        {% icon 'MapPin' size=32 %}
+      </span>
+      <p class="not-found-code">404</p>
+      <h1 id="not-found-title">Let’s get you back on track.</h1>
+      <p class="not-found-description">
+        We couldn’t find this page. The link may have changed, or the address might be incorrect.
+      </p>
+      <div class="not-found-actions">
+        <a class="button" href="/">{% icon 'Home' size=18 %} Go Home</a>
+        <button class="button outline" type="button" data-error-back hidden>
+          {% icon 'ChevronLeft' size=18 %} Go Back
+        </button>
+      </div>
+      <p class="not-found-note">Your care is still just a click away.</p>
+    </section>
+  </main>
+{% endblock %}
