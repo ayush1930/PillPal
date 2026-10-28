@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load pillpal_icons %}
+{% block content %}
+  <main class="auth-layout">
+    <aside class="auth-aside">
+      <a href="{% url 'home' %}">{% icon "ChevronLeft" size=16 %} Back</a>
+      <div>
+        {% include "partials/logo.html" %}
+        <h1>Your health,<br>in capable hands.</h1>
+        <p>Manage prescriptions, track orders, and stay on top of your medication schedule — all in one place.</p>
+        <div class="auth-note">
+          <strong>{% icon "User" size=16 %} Signing up as a Patient</strong>
+          <p>New accounts are registered as patients. Staff accounts are added by a PillPal administrator.</p>
+        </div>
+      </div>
+    </aside>
+    <section class="auth-main">
+      <div class="auth-form">
+        <div class="tabs">
+          <a href="{% url 'auth' %}"
+            class="{% if mode == 'signin' %}active{% endif %}">Sign In</a>
+          <a href="{% url 'auth' %}?mode=register"
+            class="{% if mode == 'register' %}active{% endif %}">Create Account</a>
+        </div>
+        <h2>{% if mode == "register" %}Create your patient account{% else %}Welcome back{% endif %}</h2>
+        <form method="post" class="form-stack">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button class="button full" type="submit">{% if mode == "register" %}Create Patient Account{% else %}Sign In{% endif %}</button>
+        </form>
+        <p class="center small"><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+        <p class="center muted small">Staff accounts are created by a PillPal administrator.</p>
+      </div>
+    </section>
+  </main>
+{% endblock %}
