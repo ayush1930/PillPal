@@ -19,8 +19,10 @@
           {{ dispute.description|linebreaksbr }}
         </div>
         <div class="actions dispute-links">
-          <a class="button outline compact"
-            href="{% url 'order_detail' dispute.order_id %}">View Order</a>
+          {% if dispute.order_id %}
+            <a class="button outline compact"
+              href="{% url 'order_detail' dispute.order_id %}">View Order</a>
+          {% endif %}
           {% if dispute.evidence %}
             <a class="button outline compact"
               href="{% url 'dispute_evidence' dispute.pk %}">{% icon 'FileText' size=16 %} Download Evidence</a>
