@@ -10,7 +10,7 @@
   </div>
   <div class="card-actions">
     <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
-    <strong class="mono">${{ order.total }}</strong>
+    <strong class="mono">MUR{{ order.total }}</strong>
     <a class="button outline compact"
       href="{% url 'order_detail' order.pk %}">View</a>
   </div>

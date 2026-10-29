@@ -80,7 +80,7 @@
             <p class="address-line">{{ pharmacy.address }}</p>
             <div class="meta-line">
               {% if pharmacy.distance != None %}
-                <span title="Straight-line distance from your saved address">{% icon 'MapPin' size=12 %} {{ pharmacy.distance }} mi</span>
+                <span title="Straight-line distance from your saved address">{% icon 'MapPin' size=12 %} {{ pharmacy.distance }} km</span>
               {% endif %}
               <span>{% icon 'Star' size=12 %} {% if pharmacy.rating %}{{ pharmacy.rating|floatformat:1 }}{% else %}No ratings{% endif %}</span>
               <span>{% icon 'Phone' size=12 %} {{ pharmacy.phone }}</span>

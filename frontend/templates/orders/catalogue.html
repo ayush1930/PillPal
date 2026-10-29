@@ -175,7 +175,7 @@
 
         <!-- Medication price and add to cart -->
         <div class="medication-footer">
-          <strong class="price">${{ item.price }}</strong>
+          <strong class="price">MUR{{ item.price }}</strong>
 
           <form method="post"
                 action="{% url 'cart_update' item.pk %}"

@@ -36,7 +36,7 @@
         <div class="grow">
           <h3>{{ row.item.medication.name }}</h3>
           <p class="muted small">
-            {{ row.item.pharmacy.name }} · ${{ row.item.price }} each
+            {{ row.item.pharmacy.name }} · MUR{{ row.item.price }} each
           </p>
 
           <!-- Update or remove medication quantity -->
@@ -57,7 +57,7 @@
           </form>
         </div>
 
-        <strong class="price">${{ row.total }}</strong>
+        <strong class="price">MUR{{ row.total }}</strong>
       </article>
 
     {% empty %}
@@ -124,21 +124,21 @@
         <!-- Order cost summary -->
         <div class="info-row">
           <span>Subtotal</span>
-          <strong>${{ subtotal }}</strong>
+          <strong>MUR{{ subtotal }}</strong>
         </div>
 
         <div class="info-row">
           <span>Delivery</span>
-          <strong data-delivery-charge>${{ display_fee }}</strong>
+          <strong data-delivery-charge>MUR{{ display_fee }}</strong>
         </div>
 
         <div class="info-row total-row">
           <span>Total</span>
-          <strong data-cart-total>${{ display_total }}</strong>
+          <strong data-cart-total>MUR{{ display_total }}</strong>
         </div>
 
         <p class="muted tiny">
-          Delivery is $4.99 below $30; otherwise free. Pickup is free.
+          Delivery is MUR199.60 below MUR1200; otherwise free. Pickup is free.
         </p>
         <p class="muted small">
           Payment: cash on delivery or collection.

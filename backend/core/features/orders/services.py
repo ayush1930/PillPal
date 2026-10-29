@@ -68,7 +68,7 @@ def place_order(*, patient, cart, delivery_type, address=None, prescription=None
     subtotal = sum((item.price * quantities[item.pk] for item in stock), Decimal('0'))
     if any(item.price < 0 for item in stock):
         raise ValidationError('A medication price is invalid; contact the pharmacy.')
-    fee = Decimal('4.99') if delivery_type == 'delivery' and subtotal < 30 else Decimal('0')
+    fee = Decimal('199.60') if delivery_type == 'delivery' and subtotal < 1200 else Decimal('0')
     order = Order.objects.create(patient=patient, pharmacy=pharmacy, prescription=prescription,
         delivery_address=address, delivery_type=delivery_type, subtotal=subtotal,
         delivery_fee=fee, tax=0, total=subtotal + fee)

@@ -31,10 +31,10 @@ class Pharmacy(TimestampedModel):
     # Opening hours and delivery information
     opening_hours = models.JSONField(default=dict)
     delivery_available = models.BooleanField(default=True)
-    delivery_radius_miles = models.DecimalField(
+    delivery_radius_km = models.DecimalField(
         max_digits=5,
         decimal_places=2,
-        default=10
+        default=10.00
     )
 
     active = models.BooleanField(default=True)

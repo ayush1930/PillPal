@@ -100,7 +100,7 @@ class InvitationForm(forms.Form):
 
 FORMS = {
     'addresses': (Address, ['label','street','city','state','postal_code','latitude','longitude','is_default']),
-    'pharmacies': (Pharmacy, ['name','address','phone','email','latitude','longitude','opening_hours','delivery_available','delivery_radius_miles','active']),
+    'pharmacies': (Pharmacy, ['name','address','phone','email','latitude','longitude','opening_hours','delivery_available','delivery_radius_km','active']),
     'medications': (Medication, ['name','generic_name','brand','category','dosage_form','description','requires_prescription','active']),
     'inventory': (InventoryItem, ['pharmacy','medication','supplier','price','stock','reorder_level','active']),
     'prescriptions': (Prescription, ['medication_name','doctor_name','issue_date','expiry_date','file']),
