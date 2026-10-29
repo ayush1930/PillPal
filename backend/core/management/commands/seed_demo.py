@@ -35,7 +35,7 @@ class Command(BaseCommand):
                 'opening_hours': {'always_open': True}, 'delivery_available': True})
             PharmacyStaff.objects.get_or_create(pharmacy=pharmacy, user=users['pharmacist'])
             supplier, _ = Supplier.objects.get_or_create(name='Demo Supplier')
-            for name, price, prescription in [('Demo OTC item', '5.00', False), ('Demo prescription item', '10.00', True)]:
+            for name, price, prescription in [('Demo OTC item', '200.00', False), ('Demo prescription item', '400.00', True)]:
                 medication, _ = Medication.objects.get_or_create(name=name, defaults={
                     'generic_name': name, 'category': 'Demonstration', 'requires_prescription': prescription})
                 InventoryItem.objects.get_or_create(pharmacy=pharmacy, medication=medication, defaults={
