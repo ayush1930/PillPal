@@ -447,7 +447,9 @@ def cart_view(request):
     if request.method == 'POST' and rows:
         try:
             delivery_type = request.POST.get('delivery_type','delivery')
-            address = get_object_or_404(Address,user=request.user,pk=request.POST.get('address')) if delivery_type == 'delivery' else None
+            address_id = request.POST.get("address", "").strip()
+            if delivery_type == "delivery" and not address_id: raise ValidationError("Choose a delivery address, or select pickup.")
+            address = get_object_or_404(Address, user=request.user, pk=address_id) if delivery_type == "delivery" else None
             prescription_id = request.POST.get('prescription')
             prescription = get_object_or_404(Prescription,patient=request.user,pk=prescription_id,deleted_at__isnull=True) if prescription_id else None
             if delivery_type not in Order.DeliveryType.values: raise ValidationError('Choose delivery or pickup.')
