@@ -1,75 +1,35 @@
-{% extends "dashboard/base.html" %}
-{% load pillpal_icons %}
-{% block dashboard_content %}
-  <a class="back-link"
-    href="{% url 'dashboard_section' 'disputes' %}">{% icon 'ChevronLeft' size=16 %} Back to disputes</a>
-  <div class="page-heading">
-    <div>
-      <h1>Dispute #{{ dispute.pk }}</h1>
-      <p class="muted">Order #{{ dispute.order_id }} · {{ dispute.order.pharmacy.name }}</p>
-    </div>
-    <span class="badge dispute-{{ dispute.status }}">{{ dispute.get_status_display }}</span>
-  </div>
-  <div class="order-detail-grid">
-    <div>
-      <section class="card">
-        <h2>{{ dispute.subject }}</h2>
-        <p class="muted small">{{ dispute.get_category_display }} · Submitted {{ dispute.created_at|date:'M j, Y, g:i A' }}{% if user.role == "admin" %} · {{ dispute.order.patient.name }}{% endif %}</p>
-        <div class="dispute-text">
-          {{ dispute.description|linebreaksbr }}
-        </div>
-        <div class="actions dispute-links">
-          <a class="button outline compact"
-            href="{% url 'order_detail' dispute.order_id %}">View Order</a>
-          {% if dispute.evidence %}
-            <a class="button outline compact"
-              href="{% url 'dispute_evidence' dispute.pk %}">{% icon 'FileText' size=16 %} Download Evidence</a>
-          {% endif %}
-        </div>
-      </section>
-      <section class="card">
-        <h2>Administrator Response</h2>
-        {% if dispute.admin_response %}
-          <div class="dispute-text">
-            {{ dispute.admin_response|linebreaksbr }}
-          </div>
-        {% else %}
-          <p class="muted">No response yet. Your complaint is awaiting review.</p>
-        {% endif %}
-        {% if dispute.closed_at %}
-          <p class="muted small">Closed {{ dispute.closed_at|date:'M j, Y, g:i A' }}</p>
-        {% endif %}
-        <p class="muted tiny">The administrator’s response records the outcome of this complaint.</p>
-      </section>
-      {% if user.role == "admin" %}
-        <section class="card">
-          <h2>Review Dispute</h2>
-          <form method="post" class="form-stack">
-            {% csrf_token %}
-            {% include "dashboard/form_fields.html" %}
-            <p class="muted small">A response is required when resolving or rejecting a case. To reopen a closed case, choose Under review.</p>
-            <button class="button">Save Review and Notify Patient</button>
-          </form>
-        </section>
-      {% endif %}
-    </div>
-    <aside>
-      <section class="card">
-        <h2>Case History</h2>
-        {% for event in history %}
-          <article class="dispute-event">
-            <strong>{{ event.get_to_status_display }}</strong>
-            <p class="muted tiny">{{ event.created_at|date:'M j, Y, g:i A' }} · {% if event.actor.role == "admin" %}Administrator{% elif event.actor %}Patient{% else %}Former user{% endif %}</p>
-            {% if event.response %}
-              <div class="dispute-text small">
-                {{ event.response|linebreaksbr }}
-              </div>
-            {% endif %}
-          </article>
-        {% empty %}
-          <p class="muted">No updates recorded.</p>
-        {% endfor %}
-      </section>
-    </aside>
-  </div>
-{% endblock %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Pharmacy</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for order in orders %}
+        <tr>
+          <td>#{{ order.pk }}</td>
+          <td>{{ order.pharmacy.name }}</td>
+          <td>
+            <span class="badge badge-{{ order.status }}">
+              {{ order.get_status_display }}
+            </span>
+          </td>
+          <td>MUR {{ order.total|floatformat:2 }}</td>
+          <td>
+            <a href="{% url 'order_detail' order.pk %}">View</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="empty">No completed deliveries yet.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
