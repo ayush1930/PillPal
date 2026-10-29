@@ -16,7 +16,7 @@
           </div>
         </div>
         <div class="card-actions">
-          <strong class="price">${{ item.price }}</strong>
+          <strong class="price">MUR{{ item.price }}</strong>
           <a class="button compact"
             href="{% url 'catalogue' item.pharmacy_id %}?q={{ item.medication.name|urlencode }}">Order</a>
         </div>

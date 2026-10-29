@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 ('longitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
                 ('opening_hours', models.JSONField(default=dict)),
                 ('delivery_available', models.BooleanField(default=True)),
-                ('delivery_radius_miles', models.DecimalField(decimal_places=2, default=10, max_digits=5)),
+                ('delivery_radius_km', models.DecimalField(decimal_places=2, default=10.00, max_digits=5)),
                 ('active', models.BooleanField(default=True)),
             ],
             options={

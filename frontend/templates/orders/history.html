@@ -55,7 +55,7 @@
                   <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
                 </td>
                 <td class="mono">
-                  ${{ order.delivery_fee }}
+                  MUR{{ order.delivery_fee }}
                 </td>
                 <td>
                   <a href="{% url 'order_detail' order.pk %}">View</a>

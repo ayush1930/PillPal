@@ -32,7 +32,7 @@
       <div class="bar-chart">
         {% for month in chart_months %}
           <div class="bar-column">
-            <span class="bar-value">${{ month.total|floatformat:0 }}</span>
+            <span class="bar-value">MUR{{ month.total|floatformat:0 }}</span>
             <div class="bar-track">
               <span style="height:{{ month.revenue_height }}%"></span>
             </div>

@@ -41,7 +41,7 @@
             <p class="muted small">Quantity: {{ item.quantity }}</p>
           </div>
 
-          <strong class="mono">${{ item.unit_price }} each</strong>
+          <strong class="mono">MUR{{ item.unit_price }} each</strong>
         </div>
       {% endfor %}
     </section>
@@ -110,22 +110,22 @@
 
       <div class="info-row">
         <span>Subtotal</span>
-        <strong>${{ order.subtotal }}</strong>
+        <strong>MUR{{ order.subtotal }}</strong>
       </div>
 
       <div class="info-row">
         <span>Delivery</span>
-        <strong>${{ order.delivery_fee }}</strong>
+        <strong>MUR{{ order.delivery_fee }}</strong>
       </div>
 
       <div class="info-row">
         <span>Tax</span>
-        <strong>${{ order.tax }}</strong>
+        <strong>MUR{{ order.tax }}</strong>
       </div>
 
       <div class="info-row total-row">
         <span>Total</span>
-        <strong>${{ order.total }}</strong>
+        <strong>MUR{{ order.total }}</strong>
       </div>
 
       {% if user.role == "patient" and order.status == "delivered" %}

@@ -39,7 +39,7 @@
           <div class="order-card-footer">
             <span class="muted small">{% icon 'Truck' size=14 %} {{ order.get_delivery_type_display }}{% if user.role != "patient" %} · {{ order.patient.name }}{% endif %}</span>
             <div class="card-actions">
-              <strong class="mono">${{ order.total }}</strong>
+              <strong class="mono">MUR{{ order.total }}</strong>
               <a class="button outline compact"
                 href="{% url 'order_detail' order.pk %}">View Details</a>
               {% if order.status == "delivered" and user.role == "patient" %}

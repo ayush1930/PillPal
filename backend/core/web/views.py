@@ -455,14 +455,14 @@ def cart_view(request):
             if any(i.medication.requires_prescription for i in items) and not prescription: raise ValidationError('A prescription is required for these medications.')
             if len({i.pharmacy_id for i in items}) != 1: raise ValidationError('Choose items from one pharmacy.')
             if delivery_type == 'delivery' and not items[0].pharmacy.delivery_available: raise ValidationError('This pharmacy offers pickup only.')
-            fee = Decimal('4.99') if delivery_type == 'delivery' and subtotal < 30 else Decimal('0')
+            fee = Decimal('199.60') if delivery_type == 'delivery' and subtotal < 1200 else Decimal('0')
             order = place_order(patient=request.user, cart=saved, delivery_type=delivery_type,
                                 address=address, prescription=prescription)
             request.session['cart'] = {}; request.session.pop('checkout_prescription',None)
             messages.success(request,'Order placed.'); return redirect('order_detail',pk=order.pk)
         except ValidationError as exc: error = "; ".join(exc.messages)
     ctx = shell(request.user,'orders')
-    display_fee=Decimal('4.99') if subtotal < 30 and request.POST.get('delivery_type','delivery') != 'pickup' else Decimal('0')
+    display_fee=Decimal('199.60') if subtotal < 1200 and request.POST.get('delivery_type','delivery') != 'pickup' else Decimal('0')
     ctx.update(cart_rows=rows,subtotal=subtotal,display_fee=display_fee,display_total=subtotal+display_fee,error=error,addresses=scoped('addresses',request.user),prescriptions=scoped('prescriptions',request.user).filter(status='approved',voided_at__isnull=True,expiry_date__gte=timezone.localdate()),selected_prescription=request.session.get('checkout_prescription'))
     return render(request,'orders/cart.html',ctx)
 

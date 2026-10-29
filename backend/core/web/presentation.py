@@ -5,7 +5,7 @@ from django.db.models.functions import TruncMonth
 from django.utils import timezone
 
 from core.features.accounts.models import Address, User
-from core.features.pharmacies.services import distance_miles
+from core.features.pharmacies.services import distance_km
 from core.features.pharmacies.models import Pharmacy
 from core.features.inventory.models import InventoryItem
 from core.features.medications.models import Medication
@@ -57,7 +57,7 @@ def pharmacy_context(request):
     pharmacies = list(qs)
     for pharmacy in pharmacies:
         pharmacy.open_now = opening_state(pharmacy)
-        pharmacy.distance = distance_miles(pharmacy, address)
+        pharmacy.distance = distance_km(pharmacy, address)
     if open_only: pharmacies = [p for p in pharmacies if p.open_now is True]
     if sort == 'name': pharmacies.sort(key=lambda p:p.name.casefold())
     elif sort == 'distance': pharmacies.sort(key=lambda p:(p.distance is None, p.distance or 0, p.name))

@@ -1,6 +1,6 @@
 from math import radians, sin, cos, sqrt, atan2
 
-def distance_miles(pharmacy, address):
+def distance_km(pharmacy, address):
     # Check if the user has an address
     if address is None:
         return None
@@ -38,6 +38,6 @@ def distance_miles(pharmacy, address):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     # Earth's radius in miles
-    distance = 3958.8 * c
+    distance = 6371.0 * c
 
     return round(distance, 1)

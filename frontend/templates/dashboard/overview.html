@@ -42,7 +42,7 @@
     {% for stat in summary_stats %}
       <article class="card stat-card">
         <span class="stat-icon">{% icon stat.icon size=20 %}</span>
-        <strong class="stat-value">{% if stat.money %}${% endif %}{{ stat.value|floatformat:'-1'|default:stat.value }}</strong>
+        <strong class="stat-value">{% if stat.money %}MUR{% endif %}{{ stat.value|floatformat:'-1'|default:stat.value }}</strong>
         <span>{{ stat.label }}</span>
         <small class="muted">{{ stat.sub }}</small>
       </article>
