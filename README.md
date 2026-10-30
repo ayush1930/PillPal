@@ -52,8 +52,11 @@ py -3.14 -m venv .venv
 Copy-Item .env.example .env
 .\.venv\Scripts\python.exe manage.py migrate
 .\.venv\Scripts\python.exe manage.py createsuperuser
-.\.venv\Scripts\python.exe manage.py runserver
+.\.venv\Scripts\python.exe manage.py runserver --insecure
 ```
+There is DJANGO_DEBUG=false in our local backend/.env instead of DJANGO_DEBUG=true. The runserver --insecure lets Django display our custom 404 page while runserver serves the static files locally. --insecure is used only for local development; a production server should serve static files itself.
+
+With DEBUG=true, the regular site is styled, but Django shows its technical 404 page for unknown URLs instead of our custom one.
 
 Only copy .env.example if you do not already have .env. Use your chosen administrator email and password. Keep the terminal running. Open http://127.0.0.1:8000/ for the website, http://127.0.0.1:8000/administrator/ for the administrator portal or http://127.0.0.1:8000/admin/ for Django administration. The createsuperuser command creates an administrator-role account.
 
